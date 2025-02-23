@@ -1,0 +1,29 @@
+MEMORY 
+{
+    RAM_TOTAL  (rwx) : ORIGIN = 0x20000000, LENGTH = 20K
+    FLASH_TOTAL (rx) : ORIGIN = 0x08000000, LENGTH = ${total_size}
+}
+
+MEMORY {
+    SKIP_CODES (rw): ORIGIN = ORIGIN(RAM_TOTAL), LENGTH = 4
+    RAM       (rwx): ORIGIN = ORIGIN(RAM_TOTAL) + 4, LENGTH = LENGTH(RAM_TOTAL) - 4
+
+    FLASH_BOOTL (rx) : ORIGIN = ${bootl_begin}, LENGTH = ${bootl_size}
+
+    FLASH_PARAM (rx) : ORIGIN = ${param_begin}, LENGTH = ${param_size}
+    FLASH_PARAM_BACKUP (rx) : ORIGIN = ${param_backup_begin}, LENGTH = ${param_backup_size}
+
+    FLASH_EVENT (rx) : ORIGIN = ${event_begin}, LENGTH = ${event_size}
+
+    FLASH_APPL (rx) : ORIGIN = ${appl_begin}, LENGTH = ${appl_size}
+    FLASH_APPL_BACKUP (rx) : ORIGIN = ${appl_backup_begin}, LENGTH = ${appl_backup_size}
+
+    FLASH_AUX_1 (rx) : ORIGIN = ${aux_1_begin}, LENGTH = ${aux_1_size}
+    FLASH_AUX_2 (rx) : ORIGIN = ${aux_2_begin}, LENGTH = ${aux_2_size}
+    FLASH_AUX_3 (rx) : ORIGIN = ${aux_3_begin}, LENGTH = ${aux_3_size}
+}
+
+estack = ORIGIN(RAM) + LENGTH(RAM);
+application_skip_request = ORIGIN(SKIP_CODES);
+application_entry_function = ORIGIN(FLASH_APPL) + 4;
+

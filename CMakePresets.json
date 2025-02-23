@@ -1,0 +1,44 @@
+{
+    "version": 8,
+    "cmakeMinimumRequired":{
+        "major": 3,
+        "minor":28,
+        "patch": 0
+    },
+    "configurePresets":[
+        {
+            "name":"default",
+            "generator":"Ninja",
+            "binaryDir":"${sourceDir}/build/${presetName}"
+        }, 
+        {
+            "name": "arm",
+            "inherits": "default",
+            "toolchainFile": "${sourceDir}/toolchain/arm_none_eabi.cmake"
+        }
+    ],
+    "buildPresets":[
+        {
+            "name": "default", "configurePreset": "default"
+        },
+        {
+            "name": "arm", "configurePreset": "arm"
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "default",
+            "steps": [
+                { "type": "configure", "name":"default"},
+                { "type": "build", "name": "default"}
+            ]
+        },
+        {
+            "name": "arm",
+            "steps": [
+                { "type": "configure", "name":"arm"},
+                { "type": "build", "name":"arm"}
+            ]
+        }
+    ]
+}
