@@ -6,7 +6,7 @@ add_subdirectory(compression)
 add_subdirectory(crc)
 target_link_libraries(bootloader PRIVATE sw_crc)
 
-if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
+if(CMAKE_CROSSCOMPILING)
 add_subdirectory(core_arm_m_profile)
 target_link_libraries(bootloader PRIVATE arm_m_profile)
 target_link_options(bootloader PRIVATE
