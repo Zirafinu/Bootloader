@@ -33,4 +33,6 @@ extern "C"
   static uint8_t read_application(std::size_t distance) { return 0; }
 
   void copy_backup_to_application() noexcept {}
+
+  void jump_to_application() noexcept {}
 }
