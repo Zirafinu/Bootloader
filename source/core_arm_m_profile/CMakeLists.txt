@@ -1,4 +1,4 @@
-add_library(arm_m_profile OBJECT EXCLUDE_FROM_ALL reset_arm_cortex.cpp startup.S)
+add_library(arm_m_profile STATIC EXCLUDE_FROM_ALL reset_arm_cortex.cpp startup.S)
 
 set(total_begin 0x08000000)
 set(bootl_begin 0x08000000)
@@ -27,7 +27,6 @@ set(HOMOGENOUS_PAGED_AREA_INITIALIZER "{0x08000000, 0x08010000, 0, 4}, {0x080100
 configure_file(flash_layout.h.in flash_layout.h )
 configure_file(memory_spec.ld.in memory_spec.ld )
 
-# -Wl,-Map=$<TARGET>.map
 target_link_options(arm_m_profile PUBLIC
     -nostartfiles
     -T${CMAKE_CURRENT_BINARY_DIR}/memory_spec.ld
@@ -38,3 +37,5 @@ target_compile_options(arm_m_profile PUBLIC
     -nostartfiles
 )
 target_include_directories(arm_m_profile PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+
+target_link_libraries(arm_m_profile PRIVATE gzip)

@@ -6,5 +6,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 enable_testing()
 # include(dependencies.cmake)
+add_subdirectory(dependencies)
 add_subdirectory(source)
 

@@ -10,10 +10,12 @@
             "name":"default",
             "generator":"Ninja",
             "binaryDir":"${sourceDir}/build/${presetName}"
-        }, 
+        },
+        {"name": "Release", "cacheVariables": {"CMAKE_BUILD_TYPE":"Release"}},
+        {"name": "Debug", "cacheVariables": {"CMAKE_BUILD_TYPE":"Debug"}},
         {
             "name": "arm",
-            "inherits": "default",
+            "inherits": ["default", "Release"],
             "toolchainFile": "${sourceDir}/toolchain/arm_none_eabi.cmake"
         }
     ],
