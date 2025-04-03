@@ -86,7 +86,7 @@ extern "C"
 
   // the applications reset handler address
   using entry_function_t = void (*)() noexcept;
-  extern const entry_function_t application_entry_function;
+  extern const entry_function_t application_entry_function __attribute__((noreturn));
 
   void jump_to_application() noexcept { application_entry_function(); }
 
