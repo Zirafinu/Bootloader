@@ -102,13 +102,13 @@ private:
       MAX_LITERAL_LENGTH_CODES + MAX_DISTANCE_CODES;
 
   struct SymbolHuffmanTree {
-    std::array<uint16_t, MAX_BITS + 1> count;
+    std::array<uint8_t, MAX_BITS + 1> count;
     std::array<uint16_t, MAX_LITERAL_LENGTH_CODE_COUNT> symbols;
 
     static SymbolHuffmanTree construct_fixed() noexcept;
   };
   struct DistanceHuffmanTree {
-    std::array<uint16_t, MAX_BITS + 1> count;
+    std::array<uint8_t, MAX_BITS + 1> count;
     std::array<uint16_t, MAX_DISTANCE_CODES> symbols;
 
     static DistanceHuffmanTree construct_fixed() noexcept;
