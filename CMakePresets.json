@@ -27,12 +27,20 @@
             "name": "arm", "configurePreset": "arm"
         }
     ],
+    "testPresets":[
+        {
+            "name": "default",
+            "configurePreset": "default",
+            "output": {"outputOnFailure": true}
+        }
+    ],
     "workflowPresets": [
         {
             "name": "default",
             "steps": [
-                { "type": "configure", "name":"default"},
-                { "type": "build", "name": "default"}
+                { "type": "configure", "name":"default" },
+                { "type": "build", "name": "default" },
+                { "type": "test", "name" : "default" }
             ]
         },
         {
