@@ -39,3 +39,4 @@ target_compile_options(arm_m_profile PUBLIC
 target_include_directories(arm_m_profile PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(arm_m_profile PRIVATE gzip)
+target_link_libraries(arm_m_profile PRIVATE crc)

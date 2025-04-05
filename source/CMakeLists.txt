@@ -3,6 +3,9 @@ target_sources(bootloader PRIVATE bootloader.cpp)
 
 add_subdirectory(compression)
 
+add_subdirectory(skip_application)
+target_link_libraries(bootloader PRIVATE skip_application_noinit_ram)
+
 add_subdirectory(crc)
 target_link_libraries(bootloader PRIVATE sw_crc)
 

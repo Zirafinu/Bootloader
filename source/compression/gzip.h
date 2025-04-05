@@ -57,8 +57,6 @@ inline constexpr auto operator|=(Header::Flags &lhs, Header::Flags rhs) {
   return lhs;
 }
 
-struct HuffmanTree;
-
 class Inflate {
 public:
   typedef bool (*can_read_t)();

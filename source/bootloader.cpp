@@ -7,9 +7,9 @@
  */
 bool launch_application() noexcept
 {
-  if (application_requested_skipping())
+  if (skip_application::is_requested())
   {
-    reset_application_skipping_request();
+    skip_application::reset_request();
     return true;
   }
 
