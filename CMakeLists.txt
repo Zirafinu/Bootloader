@@ -1,11 +1,15 @@
 cmake_minimum_required(VERSION 3.28)
-project(micro_bootloader CXX C ASM)
+project(micro_bootloader CXX ASM)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 enable_testing()
-# include(dependencies.cmake)
-add_subdirectory(dependencies)
+
+if(NOT TARGET Bootloader::test_base)
+    add_library(bootloader_test_base INTERFACE)
+    add_library(Bootloader::test_base ALIAS bootloader_test_base)
+endif()
+
 add_subdirectory(source)
 

@@ -12,19 +12,11 @@
             "binaryDir":"${sourceDir}/build/${presetName}"
         },
         {"name": "Release", "cacheVariables": {"CMAKE_BUILD_TYPE":"Release"}},
-        {"name": "Debug", "cacheVariables": {"CMAKE_BUILD_TYPE":"Debug"}},
-        {
-            "name": "arm",
-            "inherits": ["default", "Release"],
-            "toolchainFile": "${sourceDir}/toolchain/arm_none_eabi.cmake"
-        }
+        {"name": "Debug", "cacheVariables": {"CMAKE_BUILD_TYPE":"Debug"}}
     ],
     "buildPresets":[
         {
             "name": "default", "configurePreset": "default"
-        },
-        {
-            "name": "arm", "configurePreset": "arm"
         }
     ],
     "testPresets":[
@@ -41,13 +33,6 @@
                 { "type": "configure", "name":"default" },
                 { "type": "build", "name": "default" },
                 { "type": "test", "name" : "default" }
-            ]
-        },
-        {
-            "name": "arm",
-            "steps": [
-                { "type": "configure", "name":"arm"},
-                { "type": "build", "name":"arm"}
             ]
         }
     ]
