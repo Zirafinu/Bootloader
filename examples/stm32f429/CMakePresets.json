@@ -1,0 +1,32 @@
+{
+    "version": 8,
+    "cmakeMinimumRequired":{
+        "major": 3,
+        "minor":28,
+        "patch": 0
+    },
+    "configurePresets":[
+        {
+            "name":"default",
+            "hidden": true,
+            "generator":"Ninja",
+            "binaryDir":"${sourceDir}/build/${presetName}",
+            "toolchainFile": "toolchain/arm_none_eabi.cmake"
+        },
+        {"name": "Release", "inherits": "default", "cacheVariables": {"CMAKE_BUILD_TYPE":"Release"}},
+        {"name": "Debug", "inherits": "default", "cacheVariables": {"CMAKE_BUILD_TYPE":"Debug"}}
+    ],
+    "buildPresets":[
+        {"name": "Release", "configurePreset": "Release"},
+        {"name": "Debug", "configurePreset": "Debug"}
+    ],
+    "workflowPresets": [
+        {
+            "name": "Release",
+            "steps": [
+                { "type": "configure", "name":"Release" },
+                { "type": "build", "name": "Release" }
+            ]
+        }
+    ]
+}
