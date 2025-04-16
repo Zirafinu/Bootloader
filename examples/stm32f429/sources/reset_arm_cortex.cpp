@@ -8,11 +8,16 @@
 #include <flash_layout.h>
 #include <gzip.h>
 
-#include "stm32f4xx_ll_rcc.h"
-#include "stm32f4xx_ll_pwr.h"
-#include "stm32f4xx_ll_system.h"
+#include <stm32f4xx_hal.h>
+#include <stm32f4xx_hal_flash.h>
+#include <stm32f4xx_hal_flash_ex.h>
+#include <stm32f4xx_ll_pwr.h>
+#include <stm32f4xx_ll_rcc.h>
+#include <stm32f4xx_ll_system.h>
 
 extern "C" {
+
+void SysTick_Handler(void) { HAL_IncTick(); }
 
 // the applications reset handler address
 using entry_function_t = void (*)() noexcept;
@@ -81,25 +86,50 @@ __attribute__((used)) void init_mem() noexcept {
 }
 
 namespace {
-static void erase_application() noexcept {}
+
+class Flash_Lock {
+  public:
+    Flash_Lock() { HAL_FLASH_Unlock(); }
+    ~Flash_Lock() { HAL_FLASH_Lock(); }
+};
+
+static bool erase_application() noexcept {
+    FLASH_EraseInitTypeDef EraseInit;
+    EraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
+    EraseInit.Banks = 0xFFffFFff;
+    EraseInit.Sector = flash_layout::appl_begin_page;
+    EraseInit.NbSectors = flash_layout::appl_end_page - flash_layout::appl_begin_page;
+    EraseInit.VoltageRange = FLASH_VOLTAGE_RANGE_3;
+
+    uint32_t SectorError = 0;
+    return HAL_OK == HAL_FLASHEx_Erase(&EraseInit, &SectorError);
+}
 
 static uint8_t const *read_backup_it = nullptr;
 static uint8_t *write_application_it = nullptr;
-alignas(4) static std::array<uint8_t, 1024> write_application_buffer{};
 static size_t write_application_buffer_used = 0;
+alignas(4) static std::array<uint8_t, 1024> write_application_buffer{};
+
 
 static bool can_read_more() {
     return read_backup_it < reinterpret_cast<uint8_t const *>(flash_layout::appl_backup_end);
 }
 static uint8_t read_appl_backup() { return *read_backup_it++; }
+
+static void flush_write_buffer() {
+    Flash_Lock lock{};
+    for (size_t i = 0; i < write_application_buffer_used; i += 4) {
+        HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, reinterpret_cast<size_t>(write_application_it),
+                          *reinterpret_cast<uint32_t*>(&write_application_buffer[i]));
+        write_application_it += 4;
+    }
+    write_application_buffer_used = 0;
+}
 static void write_application(uint8_t value) {
     write_application_buffer[write_application_buffer_used] = value;
     ++write_application_buffer_used;
     if (write_application_buffer_used == write_application_buffer.size()) {
-        // flush buffer
-        write_application_buffer_used = 0;
-        std::memcpy(write_application_it, write_application_buffer.data(), write_application_buffer.size());
-        write_application_it += write_application_buffer.size();
+        flush_write_buffer();
     }
 }
 static uint8_t read_application(std::size_t distance) {
@@ -125,13 +155,14 @@ bool application_backup_is_valid() noexcept {
 }
 
 void copy_backup_to_application() noexcept {
-    erase_application();
+    if (!erase_application())
+        return;
     read_backup_it = reinterpret_cast<uint8_t const *>(&flash_layout::appl_backup_begin);
     write_application_it = reinterpret_cast<uint8_t *>(const_cast<size_t *>(&flash_layout::appl_begin));
     gzip::Inflate inflator{can_read_more, read_appl_backup, write_application, read_application};
     inflator.decode();
-    // flush buffer
-    std::memcpy(write_application_it, write_application_buffer.data(), write_application_buffer_used);
+
+    flush_write_buffer();
 }
 
 void jump_to_application() noexcept { application_entry_function(); }
