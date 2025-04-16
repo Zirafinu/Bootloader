@@ -4,6 +4,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+include(CTest)
 enable_testing()
 
 if(NOT TARGET Bootloader::test_base)
@@ -12,4 +13,3 @@ if(NOT TARGET Bootloader::test_base)
 endif()
 
 add_subdirectory(source)
-

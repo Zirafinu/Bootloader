@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <cstdlib>
 
-namespace {
+extern "C" {
 uint32_t application_skip_request = 0;
 }
 
