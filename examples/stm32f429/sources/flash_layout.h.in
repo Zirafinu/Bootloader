@@ -31,42 +31,34 @@ constexpr size_t aux_2_end = aux_2_begin + ${aux_2_size};
 constexpr size_t aux_3_begin = ${aux_3_begin};
 constexpr size_t aux_3_end = aux_3_begin + ${aux_3_size};
 
-static_assert(${total_size} ==
-                  ${bootl_size} + ${param_size} + ${param_backup_size} +
-                      ${event_size} + ${appl_size} + ${appl_backup_size} +
-                      ${aux_1_size} + ${aux_2_size} + ${aux_3_size},
+static_assert(${total_size} == ${bootl_size} + ${param_size} + ${param_backup_size} + ${event_size} +
+                                   ${appl_size} + ${appl_backup_size} + ${aux_1_size} + ${aux_2_size} +
+                                   ${aux_3_size},
               "flash size mismatch");
 
 struct Homogenous_Paged_Area {
-  size_t begin;
-  size_t bound;
-  size_t index;
-  size_t page_size;
+    size_t begin;
+    size_t bound;
+    size_t index;
+    size_t page_size;
 
-  constexpr bool contains(size_t address) const {
-    return begin <= address && address < bound;
-  }
-  constexpr size_t page_of(size_t address) const {
-    return ((address - begin) / page_size) + index;
-  }
-  constexpr bool can_enumerate_page_of(size_t address) const {
-    return begin <= address && address <= bound;
-  }
-  constexpr bool page_starts_at(size_t address) const {
-    return ((address - begin) % page_size) == 0;
-  }
+    constexpr bool contains(size_t address) const { return begin <= address && address < bound; }
+    constexpr size_t page_of(size_t address) const { return ((address - begin) / page_size) + index; }
+    constexpr bool can_enumerate_page_of(size_t address) const {
+        return begin <= address && address <= bound;
+    }
+    constexpr bool page_starts_at(size_t address) const { return ((address - begin) % page_size) == 0; }
 };
 
-constexpr Homogenous_Paged_Area flash_areas[] = {
-    ${HOMOGENOUS_PAGED_AREA_INITIALIZER}};
+constexpr Homogenous_Paged_Area flash_areas[] = {${HOMOGENOUS_PAGED_AREA_INITIALIZER}};
 
 constexpr size_t page_of(size_t address) {
-  for (const auto &area : flash_areas) {
-    if (area.can_enumerate_page_of(address)) {
-      return area.page_of(address);
+    for (const auto &area : flash_areas) {
+        if (area.can_enumerate_page_of(address)) {
+            return area.page_of(address);
+        }
     }
-  }
-  return ~size_t(0);
+    return ~size_t(0);
 }
 
 constexpr size_t bootl_begin_page = page_of(bootl_begin);

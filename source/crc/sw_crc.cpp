@@ -7,20 +7,16 @@ static constexpr uint32_t crc32_bzip2_tab[16] = {
     0x350C9B64, 0x31CD86D3, 0x3C8EA00A, 0x384FBDBD, //
 };
 
-namespace crc
-{
-  uint32_t compute(const void *mem_begin, const void *mem_end) noexcept
-  {
+namespace crc {
+uint32_t compute(const void *mem_begin, const void *mem_end) noexcept {
     const uint8_t *p = reinterpret_cast<const uint8_t *>(mem_begin);
     uint32_t crc = ~0U;
-    while (p != mem_end)
-    {
-      const uint32_t byte = uint32_t(*p++) << 24;
-      crc ^= byte;
-      crc = (crc << 4) ^ crc32_bzip2_tab[crc >> 28];
-      crc = (crc << 4) ^ crc32_bzip2_tab[crc >> 28];
+    while (p != mem_end) {
+        const uint32_t byte = uint32_t(*p++) << 24;
+        crc ^= byte;
+        crc = (crc << 4) ^ crc32_bzip2_tab[crc >> 28];
+        crc = (crc << 4) ^ crc32_bzip2_tab[crc >> 28];
     }
     return ~crc;
-  }
 }
-
+} // namespace crc
