@@ -8,7 +8,10 @@ add_library(bootloader_core STATIC)
 add_library(Bootloader::core_impl ALIAS bootloader_core)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../source ${CMAKE_CURRENT_BINARY_DIR}/bootloader)
+add_subdirectory(cube)
 add_subdirectory(sources)
+
+target_link_libraries(bootloader_core PRIVATE cube)
 
 target_link_options(bootloader PRIVATE
     -Wl,--print-memory-usage
