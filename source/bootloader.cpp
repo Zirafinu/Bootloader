@@ -25,8 +25,7 @@ bool restore_application_from_backup() noexcept {
         return false;
     }
 
-    bootloader::copy_backup_to_application();
-    return true;
+    return bootloader::copy_backup_to_application();
 }
 } // namespace
 

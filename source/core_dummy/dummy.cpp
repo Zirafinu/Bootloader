@@ -11,6 +11,6 @@ namespace bootloader {
 bool application_is_valid() noexcept { return true; }
 bool application_backup_is_valid() noexcept { return true; }
 
-void copy_backup_to_application() noexcept {}
+bool copy_backup_to_application() noexcept { return true; }
 void jump_to_application() noexcept { std::exit(1); }
 } // namespace bootloader

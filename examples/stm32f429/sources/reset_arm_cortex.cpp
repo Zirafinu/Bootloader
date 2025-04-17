@@ -110,20 +110,28 @@ static uint8_t *write_application_it = nullptr;
 static size_t write_application_buffer_used = 0;
 alignas(4) static std::array<uint8_t, 1024> write_application_buffer{};
 
-
 static bool can_read_more() {
     return read_backup_it < reinterpret_cast<uint8_t const *>(flash_layout::appl_backup_end);
 }
 static uint8_t read_appl_backup() { return *read_backup_it++; }
 
-static void flush_write_buffer() {
+static bool flush_write_buffer() {
     Flash_Lock lock{};
-    for (size_t i = 0; i < write_application_buffer_used; i += 4) {
-        HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, reinterpret_cast<size_t>(write_application_it),
-                          *reinterpret_cast<uint32_t*>(&write_application_buffer[i]));
+
+    for (size_t i = 0; i < write_application_buffer_used &&
+                       reinterpret_cast<size_t>(write_application_it) < flash_layout::appl_end;
+         i += 4) {
+        if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD, reinterpret_cast<size_t>(write_application_it),
+                              *reinterpret_cast<uint32_t *>(&write_application_buffer[i])) != HAL_OK) {
+            write_application_buffer_used -= i;
+            std::memcpy(write_application_buffer.data(), write_application_buffer.data() + i, write_application_buffer_used);
+            return false;
+        }
         write_application_it += 4;
     }
+
     write_application_buffer_used = 0;
+    return true;
 }
 static void write_application(uint8_t value) {
     write_application_buffer[write_application_buffer_used] = value;
@@ -138,7 +146,6 @@ static uint8_t read_application(std::size_t distance) {
     }
     return write_application_buffer[write_application_buffer_used - distance];
 }
-
 } // namespace
 
 namespace bootloader {
@@ -154,15 +161,17 @@ bool application_backup_is_valid() noexcept {
                         reinterpret_cast<uint8_t *>(flash_layout::appl_backup_end - 4));
 }
 
-void copy_backup_to_application() noexcept {
+bool copy_backup_to_application() noexcept {
     if (!erase_application())
-        return;
+        return false;
     read_backup_it = reinterpret_cast<uint8_t const *>(&flash_layout::appl_backup_begin);
     write_application_it = reinterpret_cast<uint8_t *>(const_cast<size_t *>(&flash_layout::appl_begin));
     gzip::Inflate inflator{can_read_more, read_appl_backup, write_application, read_application};
-    inflator.decode();
+    if (!inflator.decode()) {
+        return false;
+    }
 
-    flush_write_buffer();
+    return flush_write_buffer();
 }
 
 void jump_to_application() noexcept { application_entry_function(); }
