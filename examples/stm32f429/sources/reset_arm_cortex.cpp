@@ -15,6 +15,9 @@ using entry_function_t = void (*)() noexcept;
 extern const entry_function_t application_entry_function __attribute__((noreturn));
 
 int main() noexcept;
+// static object initialization function pointers (not required)
+// extern void (*__init_array_start[])();
+// extern void (*__init_array_end[])();
 // the addresses to constant data
 extern size_t data_load_start;
 extern size_t data_load_end;
@@ -33,25 +36,23 @@ __attribute__((used)) void init_mem() noexcept {
     std::memcpy(&data_start, &data_load_start, size_t(&data_load_end) - size_t(&data_load_start));
     std::memset(&bss_start, 0, size_t(&bss_end) - size_t(&bss_start));
 
+    // initialization of static objects (not required)
     // __libc_init_array();
+    // or :
+    // for (auto *current = __init_array_start; current != __init_array_end; ++current) {
+    //     (*current)();
+    // }
     main();
 }
 }
 
 namespace {
-using flash_layout::appl_backup_begin;
-using flash_layout::appl_backup_end;
-using flash_layout::appl_begin;
-using flash_layout::appl_end;
-
 static void erase_application() noexcept {}
 
 static uint8_t const *read_backup_it = nullptr;
 static uint8_t *write_application_it = nullptr;
-//   static std::array<uint8_t, 32> read_buffer{};
-//   static uint16_t read_buffer_consumed = 0;
-static std::array<uint8_t, 1024> write_application_buffer{};
-static uint16_t write_application_buffer_used = 0;
+alignas(4) static std::array<uint8_t, 1024> write_application_buffer{};
+static size_t write_application_buffer_used = 0;
 
 static bool can_read_more() {
     return read_backup_it < reinterpret_cast<uint8_t const *>(flash_layout::appl_backup_end);
