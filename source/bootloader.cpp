@@ -8,9 +8,13 @@ namespace {
  * @return true if the application is valid.
  */
 bool launch_application() noexcept {
-    if (skip_application::is_requested()) {
-        skip_application::reset_request();
+    if (skip_application::skip_is_requested()) {
+        skip_application::skip_reset_request();
         return true;
+    }
+    if (skip_application::update_is_requested()) {
+        skip_application::update_reset_request();
+        return false;
     }
 
     if (!bootloader::application_is_valid()) {
@@ -32,8 +36,9 @@ bool restore_application_from_backup() noexcept {
 extern "C" int bootloader_main() noexcept {
     const bool application_valid = launch_application();
     if (!application_valid) {
-        if (restore_application_from_backup())
+        if (restore_application_from_backup()) {
             launch_application();
+        }
     }
 
     // failed to launch, the application is not valid, so is the backup
