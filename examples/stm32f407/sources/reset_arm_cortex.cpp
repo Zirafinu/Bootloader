@@ -29,7 +29,7 @@ uint32_t HAL_GetTick() { return TIM2->CNT; }
 using entry_function_t = void (*)() noexcept;
 extern const entry_function_t application_entry_function __attribute__((noreturn));
 
-int main() noexcept;
+int bootloader_main() noexcept;
 // static object initialization function pointers (not required)
 // extern void (*__init_array_start[])();
 // extern void (*__init_array_end[])();
@@ -72,7 +72,7 @@ __attribute__((used)) void init_mem() noexcept {
     // for (auto *current = __init_array_start; current != __init_array_end; ++current) {
     //     (*current)();
     // }
-    main();
+    bootloader_main();
 }
 }
 

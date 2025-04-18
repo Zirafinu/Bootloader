@@ -1,11 +1,16 @@
 #include "gzip.h"
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <cstring>
 
 namespace gzip {
 
 Header Header::parse(uint8_t const *start, uint8_t const *end) {
-    Header result;
+    Header result{};
+    if (end < (start + 10)) {
+        return result;
+    }
     if (Magic_Bytes[0] != start[0] || Magic_Bytes[1] != start[1] || Method_Deflate != start[2]) {
         return result;
     }
@@ -18,7 +23,7 @@ Header Header::parse(uint8_t const *start, uint8_t const *end) {
     }
 
     result.os = start[9];
-    size_t length = 10;
+    std::size_t length = 10;
     if (uint8_t(result.flags) & uint8_t(Flags::EXTRA)) {
         result.extra_length = start[length] | (start[length + 1] << 8);
         length += 2;

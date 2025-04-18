@@ -29,7 +29,7 @@ bool restore_application_from_backup() noexcept {
 }
 } // namespace
 
-int main() noexcept {
+extern "C" int bootloader_main() noexcept {
     const bool application_valid = launch_application();
     if (!application_valid) {
         if (restore_application_from_backup())
