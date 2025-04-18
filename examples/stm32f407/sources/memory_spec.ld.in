@@ -7,7 +7,7 @@ MEMORY
 
 MEMORY {
     SKIP_CODES (rw): ORIGIN = ORIGIN(RAM_TOTAL),     LENGTH = 4
-    RAM       (rwx): ORIGIN = ORIGIN(RAM_TOTAL) + 4, LENGTH = LENGTH(RAM_TOTAL) - 4
+    RAM_ACTIVE(rwx): ORIGIN = ORIGIN(RAM_TOTAL) + 4, LENGTH = LENGTH(RAM_TOTAL) - 4
 
     FLASH_BOOTLOADER  (rx) : ORIGIN = ${bootl_begin}, LENGTH = ${bootl_size}
     FLASH_APPLICATION (rx) : ORIGIN = ${appli_begin}, LENGTH = ${appli_size}
@@ -17,7 +17,6 @@ MEMORY {
     FLASH_AUXILIARY   (rx) : ORIGIN = ${auxil_begin}, LENGTH = ${auxil_size}
 }
 
-estack = ORIGIN(RAM) + LENGTH(RAM);
 application_skip_request = ORIGIN(SKIP_CODES);
 application_entry_function = ORIGIN(FLASH_APPLICATION) + 4;
 

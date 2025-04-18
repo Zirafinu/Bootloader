@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_library(bootloader_core STATIC EXCLUDE_FROM_ALL)
+add_library(bootloader_core OBJECT EXCLUDE_FROM_ALL)
 add_library(Bootloader::core_impl ALIAS bootloader_core)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../source ${CMAKE_CURRENT_BINARY_DIR}/bootloader)

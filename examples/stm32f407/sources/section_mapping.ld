@@ -23,6 +23,23 @@ SECTIONS
         *(.text.main*)
     } > FLASH
 
+    .fast_text : {
+        . = ALIGN(4);
+        fast_text_start = .;
+        *(.text.*crc*)
+        fast_text_end = ALIGN(4);
+    } > FAST_CODE_RAM AT>FLASH
+    fast_text_load_start = LOADADDR(.fast_text);
+
+    .fast_data : {
+        . = ALIGN(4);
+        fast_data_start = .;
+        *(.rodata.*crc*)
+        *(.data.*crc*)
+        fast_data_end = ALIGN(4);
+    } > FAST_DATA_RAM AT>FLASH
+    fast_data_load_start = LOADADDR(.fast_data);
+
     .text : {
         . = ALIGN(4);
         *(.text)           /* .text sections (code) */
@@ -94,9 +111,9 @@ SECTIONS
         *(.data*)          /* .data* sections */
         *(.RamFunc)        /* .RamFunc sections */
         *(.RamFunc*)       /* .RamFunc* sections */
+        data_end = ALIGN(4);
     } > RAM AT> FLASH
     data_load_start = LOADADDR(.data);
-    data_load_end = data_load_start + SIZEOF(.data);
 
     .bss : {
         . = ALIGN(4);
@@ -104,14 +121,22 @@ SECTIONS
         *(.bss)
         *(.bss*)
         *(COMMON)
-        . = ALIGN(4);
-        bss_end = .;
+        bss_end = ALIGN(4);
     } > RAM
 
-    .stack_and_heap : {
+    .heap : {
         . = ALIGN(8);
-        . += 0x400;
-    } > RAM
+        heap_start = .;
+        . += 0x00;
+        heap_end = ALIGN(8);
+    } > HEAP_RAM
+
+    .stack : {
+        . = ALIGN(8);
+        stack_top = .;
+        . += 10K;
+        estack = ALIGN(8);
+    } > STACK_RAM
 
     .skip_codes (NOLOAD): {
         . += 4;

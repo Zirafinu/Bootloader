@@ -61,14 +61,14 @@ set(WARNING_FLAGS "-Wall -Wextra -Wpedantic -Werror")
 set(OBJECT_GEN_FLAGS "${CPU_GEN_FLAGS} ${WARNING_FLAGS} -fno-builtin -ffunction-sections -fdata-sections -fomit-frame-pointer")
 
 set(CMAKE_C_FLAGS_INIT   "${OBJECT_GEN_FLAGS} " CACHE INTERNAL "C Compiler options")
-set(CMAKE_CXX_FLAGS_INIT "${OBJECT_GEN_FLAGS} -fno-exceptions  -fno-threadsafe-statics " CACHE INTERNAL "C++ Compiler options")
+set(CMAKE_CXX_FLAGS_INIT "${OBJECT_GEN_FLAGS} -fno-exceptions -fno-threadsafe-statics " CACHE INTERNAL "C++ Compiler options")
 set(CMAKE_ASM_FLAGS_INIT "${OBJECT_GEN_FLAGS} -x assembler-with-cpp  -MMD -MP " CACHE INTERNAL "ASM Compiler options")
 
 
 # -Wl,--gc-sections     Perform the dead code elimination.
 # --specs=nano.specs    Link with newlib-nano.
 # --specs=nosys.specs   No syscalls, provide empty implementations for the POSIX system calls.
-set(CMAKE_EXE_LINKER_FLAGS_INIT "-Wl,--gc-sections -fno-exceptions --specs=nano.specs --specs=nosys.specs -mthumb -mabi=aapcs -Wl,-Map=${CMAKE_PROJECT_NAME}.map" CACHE INTERNAL "Linker options")
+set(CMAKE_EXE_LINKER_FLAGS_INIT "${CPU_GEN_FLAGS} -Wl,--gc-sections -fno-exceptions --specs=nano.specs --specs=nosys.specs -Wl,-Map=${CMAKE_PROJECT_NAME}.map" CACHE INTERNAL "Linker options")
 
 #---------------------------------------------------------------------------------------
 # Set debug/release build configuration Options
