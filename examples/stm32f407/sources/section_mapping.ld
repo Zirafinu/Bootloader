@@ -16,7 +16,7 @@ SECTIONS
         KEEP(*(.init_array))      /* static constructors */
         KEEP(*(.ctors))           /* static constructors */
         __init_array_end = .;
-    } > FLASH
+    } > RESET_FLASH
 
     .main : {
         . = ALIGN(4);
