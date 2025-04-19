@@ -20,18 +20,25 @@ set(HOMOGENOUS_PAGED_AREA_INITIALIZER "{0x08000000, 0x08010000, 0, 4}, {0x080100
 configure_file(flash_layout.h.in flash_layout.h)
 configure_file(memory_spec.ld.in memory_spec.ld)
 
+add_library(libc STATIC libc_functions.cpp)
+target_compile_options(libc PRIVATE -fno-lto -Os)
+target_link_options(libc PRIVATE -fno-lto -Os)
+
 target_sources(bootloader_core PRIVATE reset_arm_cortex.cpp startup.S)
 target_include_directories(bootloader_core PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 target_include_directories(bootloader_core PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
 target_link_libraries(bootloader_core PUBLIC Bootloader::gzip $<TARGET_OBJECTS:Bootloader::gzip>)
 target_link_libraries(bootloader_core PUBLIC Bootloader::crc_impl $<TARGET_OBJECTS:Bootloader::crc_impl>)
+target_link_libraries(bootloader_core PUBLIC libc)
 
 target_compile_options(bootloader_core PUBLIC
     -nostartfiles
+    -nodefaultlibs
 )
 target_link_options(bootloader_core PUBLIC
     -nostartfiles
+    -nodefaultlibs
     -T${CMAKE_CURRENT_BINARY_DIR}/memory_spec.ld
     -T${CMAKE_CURRENT_LIST_DIR}/region_alias.ld
     -T${CMAKE_CURRENT_LIST_DIR}/section_mapping.ld

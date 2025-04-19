@@ -8,6 +8,7 @@ SECTIONS
         KEEP(*(.text.init_mem))
         *:libc_a-memset.o(.text)
         *:libc_a-memcpy-stub.o(.text)
+        *:libc_a-memcpy.o(.text)
         *(.text.memset)
         *(.text.memcpy)
 

@@ -49,73 +49,6 @@ extern size_t fast_data_start;
 extern size_t fast_data_end;
 extern size_t fast_data_load_start;
 
-void fast_memcpy(void *dst, const void *src, size_t length) {
-    auto dst_addr = reinterpret_cast<size_t>(dst);
-    auto src_addr = reinterpret_cast<size_t>(src);
-    auto const end_addr = dst_addr + length;
-
-    if ((dst_addr % 4) == (src_addr % 4) && length >= 16) {
-        while ((dst_addr % 4) != 0) {
-            *reinterpret_cast<uint8_t *>(dst_addr) = *reinterpret_cast<uint8_t const *>(src_addr);
-            src_addr += 1;
-            dst_addr += 1;
-        }
-        const size_t end_fast_copy_addr = end_addr - (4 * sizeof(size_t));
-        while (dst_addr <= end_fast_copy_addr) [[likely]] {
-            // load 4 words from src and then store them to dst, while incrementing the addresses
-            __asm__ volatile("LDMIA %1!, {r4-r7}\n"
-                             "STMIA %0!, {r4-r7}"
-                             : "+r"(dst_addr), "+r"(src_addr)
-                             :
-                             : "r4", "r5", "r6", "r7");
-        }
-
-        while (dst_addr <= (end_addr - sizeof(size_t))) {
-            *reinterpret_cast<size_t *>(dst_addr) = *reinterpret_cast<size_t const *>(src_addr);
-            src_addr += sizeof(size_t);
-            dst_addr += sizeof(size_t);
-        }
-    }
-    while (dst_addr != end_addr) {
-        *reinterpret_cast<uint8_t *>(dst_addr) = *reinterpret_cast<uint8_t const *>(src_addr);
-        src_addr += 1;
-        dst_addr += 1;
-    }
-}
-
-void fast_memset(void *dst, uint8_t value, size_t length) {
-    auto dst_addr = reinterpret_cast<size_t>(dst);
-    auto const end_addr = dst_addr + length;
-
-    if (length >= 16) {
-        while ((dst_addr % 4) != 0) {
-            *reinterpret_cast<uint8_t *>(dst_addr) = value;
-            dst_addr += 1;
-        }
-
-        const size_t value_x4 = 0x01010101 * value;
-        const size_t end_fast_set_addr = (end_addr - (4 * sizeof(size_t)));
-        if (dst_addr <= end_fast_set_addr) {
-            do {
-                // store 4 copies at a time, while incrementing the addresses
-                __asm__ volatile("STRD %1, %1, [%0], +8\n"
-                                 "STRD %1, %1, [%0], +8"
-                                 : "+r"(dst_addr)
-                                 : "r"(value_x4));
-            } while (dst_addr <= end_fast_set_addr);
-        }
-
-        while (dst_addr <= (end_addr - sizeof(size_t))) {
-            *reinterpret_cast<size_t *>(dst_addr) = value_x4;
-            dst_addr += sizeof(size_t);
-        }
-    }
-    while (dst_addr != end_addr) {
-        *reinterpret_cast<uint8_t *>(dst_addr) = value;
-        dst_addr += 1;
-    }
-}
-
 __attribute__((used)) void init_mem() noexcept {
     LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSI, LL_RCC_PLLM_DIV_8, 96, LL_RCC_PLLP_DIV_2);
     LL_RCC_PLL_Enable();
@@ -138,12 +71,12 @@ __attribute__((used)) void init_mem() noexcept {
     // into it
 
     // initialize loaded memory sections
-    fast_memcpy(&data_start, &data_load_start, size_t(&data_end) - size_t(&data_start));
-    fast_memset(&bss_start, 0, size_t(&bss_end) - size_t(&bss_start));
+    std::memcpy(&data_start, &data_load_start, size_t(&data_end) - size_t(&data_start));
+    std::memset(&bss_start, 0, size_t(&bss_end) - size_t(&bss_start));
 
     // initialize fast ram sections
-    fast_memcpy(&fast_data_start, &fast_data_load_start, size_t(&fast_data_end) - size_t(&fast_data_start));
-    fast_memcpy(&fast_text_start, &fast_text_load_start, size_t(&fast_text_end) - size_t(&fast_text_start));
+    std::memcpy(&fast_data_start, &fast_data_load_start, size_t(&fast_data_end) - size_t(&fast_data_start));
+    std::memcpy(&fast_text_start, &fast_text_load_start, size_t(&fast_text_end) - size_t(&fast_text_start));
 
     // initialization of static objects (not required)
     // __libc_init_array();
