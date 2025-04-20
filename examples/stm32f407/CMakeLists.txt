@@ -23,7 +23,7 @@ add_library(Bootloader::config_base ALIAS config_base)
 add_library(bootloader_core OBJECT EXCLUDE_FROM_ALL)
 add_library(Bootloader::core_impl ALIAS bootloader_core)
 
-add_library(test_base INTERFACE)
+add_library(test_base OBJECT sources/startup_qemu.S)
 add_library(Bootloader::test_base ALIAS test_base)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../source ${CMAKE_CURRENT_BINARY_DIR}/bootloader)
@@ -49,13 +49,14 @@ set_target_properties(bootloader PROPERTIES LINK_DEPENDS "${link_dependencies}")
 set_target_properties(bootloader PROPERTIES ADDITIONAL_CLEAN_FILES $<TARGET_FILE_BASE_NAME:bootloader>.map)
 
 # Flags to qemu emulation
-target_link_options(test_base INTERFACE
-    --specs=nosys.specs
+target_link_options(test_base PUBLIC
     --specs=nano.specs -Wl,-lc
     -specs=rdimon.specs -Wl,-lrdimon
     -T${CMAKE_CURRENT_LIST_DIR}/sources/memory_spec_qemu.ld
     -T${CMAKE_CURRENT_LIST_DIR}/sources/region_alias_qemu.ld
     -T${CMAKE_CURRENT_LIST_DIR}/sources/section_mapping.ld
+    -e_start
+    -Wl,--print-memory-usage
 )
 get_target_property(link_dependencies test_base LINK_DEPENDS)
 list(FILTER link_dependencies EXCLUDE REGEX "link_dependencies-NOTFOUND")

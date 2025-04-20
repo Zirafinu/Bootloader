@@ -117,10 +117,12 @@ SECTIONS
     .bss : {
         . = ALIGN(4);
         bss_start = .;
+        __bss_start__ = .;
         *(.bss)
         *(.bss*)
         *(COMMON)
         bss_end = ALIGN(4);
+        __bss_end__ = .;
     } > RAM
 
     .heap : {
@@ -128,6 +130,8 @@ SECTIONS
         heap_start = .;
         . += 0x00;
         heap_end = ALIGN(8);
+        end = .;
+        __end__ = .;
     } > HEAP_RAM
 
     .stack : {
