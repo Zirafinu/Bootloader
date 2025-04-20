@@ -1,5 +1,3 @@
-ENTRY(Reset_Handler)
-
 SECTIONS
 {
     .pre_startup : {

@@ -19,4 +19,3 @@ MEMORY {
 
 application_skip_request = ORIGIN(SKIP_CODES);
 application_entry_function = ORIGIN(FLASH_APPLICATION) + 4;
-

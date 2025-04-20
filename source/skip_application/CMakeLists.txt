@@ -8,7 +8,7 @@ target_link_libraries(skip_application_noinit_ram PUBLIC skip_application Bootlo
 if(BUILD_TESTING)
 add_executable(test_skip_application test_skip_application.cpp skip_application_noinit_ram.cpp)
 target_link_libraries(test_skip_application PRIVATE skip_application Bootloader::test_base)
-add_test(NAME test_skip_application COMMAND $<TARGET_FILE:test_skip_application>)
+add_test(NAME test_skip_application COMMAND test_skip_application)
 endif()
 
 add_library(Bootloader::skip_application_impl ALIAS skip_application_noinit_ram)

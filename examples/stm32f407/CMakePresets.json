@@ -20,12 +20,16 @@
         {"name": "Release", "configurePreset": "Release"},
         {"name": "Debug", "configurePreset": "Debug"}
     ],
+    "testPresets": [
+        {"name": "Release", "configurePreset": "Release", "output": {"outputOnFailure":true}}
+    ],
     "workflowPresets": [
         {
             "name": "Release",
             "steps": [
                 { "type": "configure", "name":"Release" },
-                { "type": "build", "name": "Release" }
+                { "type": "build", "name": "Release" },
+                { "type": "test", "name": "Release" }
             ]
         }
     ]

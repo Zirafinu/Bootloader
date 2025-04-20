@@ -7,6 +7,16 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 include(CTest)
 enable_testing()
 
+# running the tests off target with qemu
+set(CMAKE_CROSSCOMPILING_EMULATOR
+    qemu-system-arm
+    -cpu cortex-m4 -machine mps2-an386
+    -monitor none -nographic
+    -serial null -semihosting
+    -kernel # command to run here
+)
+# running tests on target with gdb
+
 add_library(config_base INTERFACE)
 add_library(Bootloader::config_base ALIAS config_base)
 
@@ -24,6 +34,7 @@ target_link_options(bootloader PRIVATE
     -T${CMAKE_CURRENT_BINARY_DIR}/sources/memory_spec.ld
     -T${CMAKE_CURRENT_LIST_DIR}/sources/region_alias.ld
     -T${CMAKE_CURRENT_LIST_DIR}/sources/section_mapping.ld
+    -eReset_Handler
     -Wl,--print-memory-usage
     -Wl,-Map=$<TARGET_FILE_BASE_NAME:bootloader>.map
 )
@@ -36,3 +47,21 @@ list(APPEND link_dependencies
 )
 set_target_properties(bootloader PROPERTIES LINK_DEPENDS "${link_dependencies}")
 set_target_properties(bootloader PROPERTIES ADDITIONAL_CLEAN_FILES $<TARGET_FILE_BASE_NAME:bootloader>.map)
+
+# Flags to qemu emulation
+target_link_options(test_base INTERFACE
+    --specs=nosys.specs
+    --specs=nano.specs -Wl,-lc
+    -specs=rdimon.specs -Wl,-lrdimon
+    -T${CMAKE_CURRENT_LIST_DIR}/sources/memory_spec_qemu.ld
+    -T${CMAKE_CURRENT_LIST_DIR}/sources/region_alias_qemu.ld
+    -T${CMAKE_CURRENT_LIST_DIR}/sources/section_mapping.ld
+)
+get_target_property(link_dependencies test_base LINK_DEPENDS)
+list(FILTER link_dependencies EXCLUDE REGEX "link_dependencies-NOTFOUND")
+list(APPEND link_dependencies
+    ${CMAKE_CURRENT_LIST_DIR}/sources/memory_spec_qemu.ld
+    ${CMAKE_CURRENT_LIST_DIR}/sources/region_alias_qemu.ld
+    ${CMAKE_CURRENT_LIST_DIR}/sources/section_mapping.ld
+)
+set_target_properties(test_base PROPERTIES INTERFACE_LINK_DEPENDS "${link_dependencies}")
