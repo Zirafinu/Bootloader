@@ -12,9 +12,18 @@ add_subdirectory(cube)
 add_subdirectory(sources)
 
 target_link_options(bootloader PRIVATE
+    -T${CMAKE_CURRENT_BINARY_DIR}/sources/memory_spec.ld
+    -T${CMAKE_CURRENT_LIST_DIR}/sources/region_alias.ld
+    -T${CMAKE_CURRENT_LIST_DIR}/sources/section_mapping.ld
     -Wl,--print-memory-usage
     -Wl,-Map=$<TARGET_FILE_BASE_NAME:bootloader>.map
 )
-set_target_properties(bootloader PROPERTIES
-    ADDITIONAL_CLEAN_FILES $<TARGET_FILE_BASE_NAME:bootloader>.map
+get_target_property(link_dependencies bootloader LINK_DEPENDS)
+list(FILTER link_dependencies EXCLUDE REGEX "link_dependencies-NOTFOUND")
+list(APPEND link_dependencies
+    ${CMAKE_CURRENT_BINARY_DIR}/sources/memory_spec.ld
+    ${CMAKE_CURRENT_LIST_DIR}/sources/region_alias.ld
+    ${CMAKE_CURRENT_LIST_DIR}/sources/section_mapping.ld
 )
+set_target_properties(bootloader PROPERTIES LINK_DEPENDS "${link_dependencies}")
+set_target_properties(bootloader PROPERTIES ADDITIONAL_CLEAN_FILES $<TARGET_FILE_BASE_NAME:bootloader>.map)

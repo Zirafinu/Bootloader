@@ -21,8 +21,26 @@ configure_file(flash_layout.h.in flash_layout.h)
 configure_file(memory_spec.ld.in memory_spec.ld)
 
 add_library(libc STATIC libc_functions.cpp)
-target_compile_options(libc PRIVATE -fno-lto -Os)
-target_link_options(libc PRIVATE -fno-lto -Os)
+target_compile_options(libc
+    PRIVATE
+        -fno-lto
+        -Os
+    PUBLIC
+        -nodefaultlibs
+        $<$<COMPILE_LANGUAGE:CXX>:
+        -fno-exceptions
+        -fno-threadsafe-statics
+        >
+)
+target_link_options(libc
+    PRIVATE
+        -fno-lto
+        -Os
+    PUBLIC
+        -nodefaultlibs
+        -fno-exceptions
+        --specs=nosys.specs
+)
 
 target_sources(bootloader_core PRIVATE reset_arm_cortex.cpp startup.S)
 target_include_directories(bootloader_core PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
@@ -31,26 +49,9 @@ target_include_directories(bootloader_core PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 target_link_libraries(bootloader_core PUBLIC Bootloader::gzip $<TARGET_OBJECTS:Bootloader::gzip>)
 target_link_libraries(bootloader_core PUBLIC Bootloader::crc_impl $<TARGET_OBJECTS:Bootloader::crc_impl>)
 target_link_libraries(bootloader_core PUBLIC libc)
+# should Bootloader::config depend on the libc target?
+target_link_libraries(gzip PUBLIC libc)
 
-target_compile_options(bootloader_core PUBLIC
-    -nostartfiles
-    -nodefaultlibs
-)
-target_link_options(bootloader_core PUBLIC
-    -nostartfiles
-    -nodefaultlibs
-    -T${CMAKE_CURRENT_BINARY_DIR}/memory_spec.ld
-    -T${CMAKE_CURRENT_LIST_DIR}/region_alias.ld
-    -T${CMAKE_CURRENT_LIST_DIR}/section_mapping.ld
-)
+target_compile_options(bootloader_core PUBLIC -nostartfiles)
+target_link_options(bootloader_core PUBLIC -nostartfiles)
 
-get_target_property(link_dependencies bootloader_core LINK_DEPENDS)
-list(FILTER link_dependencies EXCLUDE REGEX "link_dependencies-NOTFOUND")
-list(APPEND link_dependencies
-    ${CMAKE_CURRENT_BINARY_DIR}/memory_spec.ld
-    ${CMAKE_CURRENT_LIST_DIR}/region_alias.ld
-    ${CMAKE_CURRENT_LIST_DIR}/section_mapping.ld
-)
-set_target_properties(bootloader_core PROPERTIES
-    INTERFACE_LINK_DEPENDS "${link_dependencies}"
-)
