@@ -41,6 +41,7 @@ target_link_options(libc
         -fno-exceptions
         --specs=nosys.specs
 )
+target_link_libraries(config_base INTERFACE libc)
 
 target_sources(bootloader_core PRIVATE reset_arm_cortex.cpp startup.S)
 target_include_directories(bootloader_core PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
@@ -48,9 +49,7 @@ target_include_directories(bootloader_core PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
 target_link_libraries(bootloader_core PUBLIC Bootloader::gzip $<TARGET_OBJECTS:Bootloader::gzip>)
 target_link_libraries(bootloader_core PUBLIC Bootloader::crc_impl $<TARGET_OBJECTS:Bootloader::crc_impl>)
-target_link_libraries(bootloader_core PUBLIC libc)
-# should Bootloader::config depend on the libc target?
-target_link_libraries(gzip PUBLIC libc)
+target_link_libraries(bootloader_core PUBLIC config_base)
 
 target_compile_options(bootloader_core PUBLIC -nostartfiles)
 target_link_options(bootloader_core PUBLIC -nostartfiles)

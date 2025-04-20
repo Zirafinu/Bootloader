@@ -3,7 +3,7 @@ target_include_directories(skip_application INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
 if(NOT TARGET Bootloader::skip_application_impl)
 add_library(skip_application_noinit_ram OBJECT EXCLUDE_FROM_ALL skip_application_noinit_ram.cpp)
-target_link_libraries(skip_application_noinit_ram PUBLIC skip_application)
+target_link_libraries(skip_application_noinit_ram PUBLIC skip_application Bootloader::config_base)
 
 if(BUILD_TESTING)
 add_executable(test_skip_application test_skip_application.cpp skip_application_noinit_ram.cpp)

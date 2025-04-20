@@ -1,6 +1,7 @@
-add_library(gzip OBJECT EXCLUDE_FROM_ALL gzip.cpp)
-target_include_directories(gzip PUBLIC ${CMAKE_CURRENT_LIST_DIR})
-add_library(Bootloader::gzip ALIAS gzip)
+add_library(bootloader_gzip OBJECT EXCLUDE_FROM_ALL gzip.cpp)
+target_include_directories(bootloader_gzip PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+target_link_libraries(bootloader_gzip PUBLIC Bootloader::config_base)
+add_library(Bootloader::gzip ALIAS bootloader_gzip)
 
 if(BUILD_TESTING)
 add_executable(test_gzip test_gzip.cpp gzip.cpp)

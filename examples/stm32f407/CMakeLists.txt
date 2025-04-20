@@ -4,6 +4,9 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+add_library(config_base INTERFACE)
+add_library(Bootloader::config_base ALIAS config_base)
+
 add_library(bootloader_core OBJECT EXCLUDE_FROM_ALL)
 add_library(Bootloader::core_impl ALIAS bootloader_core)
 
