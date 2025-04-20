@@ -5,7 +5,7 @@ extern "C" {
 uint32_t application_skip_request = 0;
 }
 
-int main(int argc, char **args) {
+int main(int, char **) {
     using namespace skip_application;
     int result = 0;
     skip_request();

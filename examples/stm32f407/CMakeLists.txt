@@ -4,11 +4,17 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+include(CTest)
+enable_testing()
+
 add_library(config_base INTERFACE)
 add_library(Bootloader::config_base ALIAS config_base)
 
 add_library(bootloader_core OBJECT EXCLUDE_FROM_ALL)
 add_library(Bootloader::core_impl ALIAS bootloader_core)
+
+add_library(test_base INTERFACE)
+add_library(Bootloader::test_base ALIAS test_base)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../source ${CMAKE_CURRENT_BINARY_DIR}/bootloader)
 add_subdirectory(cube)

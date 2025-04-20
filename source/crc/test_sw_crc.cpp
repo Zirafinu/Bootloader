@@ -1,7 +1,7 @@
 #include <array>
 #include <crc.h>
 
-int main(int argc, char **args) {
+int main(int, char **) {
     const char message[] = "123456789";
     const auto crc_value = crc::compute(message, &message[std::size(message) - 1]);
 
