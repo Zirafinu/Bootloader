@@ -13,15 +13,16 @@
             "binaryDir":"${sourceDir}/build/${presetName}",
             "toolchainFile": "cmake/arm_none_eabi.cmake"
         },
-        {"name": "Release", "inherits": "default", "cacheVariables": {"CMAKE_BUILD_TYPE":"Release"}},
-        {"name": "Debug", "inherits": "default", "cacheVariables": {"CMAKE_BUILD_TYPE":"Debug"}}
+        {"name": "Release", "inherits": "default", "cacheVariables": {"CMAKE_BUILD_TYPE":"Release", "TEST_ON_TARGET": "1"}},
+        {"name": "Debug", "inherits": "default", "cacheVariables": {"CMAKE_BUILD_TYPE":"Debug", "TEST_ON_TARGET": "0"}}
     ],
     "buildPresets":[
         {"name": "Release", "configurePreset": "Release"},
         {"name": "Debug", "configurePreset": "Debug"}
     ],
     "testPresets": [
-        {"name": "Release", "configurePreset": "Release", "output": {"outputOnFailure":true}}
+        {"name": "Release", "configurePreset": "Release", "output": {"outputOnFailure":true}},
+        {"name": "Debug", "configurePreset": "Debug", "output": {"outputOnFailure":true}}
     ],
     "workflowPresets": [
         {
@@ -30,6 +31,14 @@
                 { "type": "configure", "name":"Release" },
                 { "type": "build", "name": "Release" },
                 { "type": "test", "name": "Release" }
+            ]
+        },
+        {
+            "name": "Debug",
+            "steps": [
+                { "type": "configure", "name":"Debug" },
+                { "type": "build", "name": "Debug" },
+                { "type": "test", "name": "Debug" }
             ]
         }
     ]
