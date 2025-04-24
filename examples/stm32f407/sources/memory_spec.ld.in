@@ -6,8 +6,8 @@ MEMORY
 }
 
 MEMORY {
-    SKIP_CODES (rw): ORIGIN = ORIGIN(RAM_TOTAL),     LENGTH = 4
-    RAM_ACTIVE(rwx): ORIGIN = ORIGIN(RAM_TOTAL) + 4, LENGTH = LENGTH(RAM_TOTAL) - 4
+    RAM_ACTIVE(rwx): ORIGIN = ORIGIN(RAM_TOTAL)                     , LENGTH = LENGTH(RAM_TOTAL) - 4
+    SKIP_CODES (rw): ORIGIN = ORIGIN(RAM_TOTAL) + LENGTH(RAM_ACTIVE), LENGTH = 4
 
     FLASH_BOOTLOADER  (rx) : ORIGIN = ${bootl_begin}, LENGTH = ${bootl_size}
     FLASH_APPLICATION (rx) : ORIGIN = ${appli_begin}, LENGTH = ${appli_size}

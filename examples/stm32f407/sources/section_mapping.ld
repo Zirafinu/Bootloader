@@ -1,8 +1,9 @@
 SECTIONS
 {
-    .pre_startup : {
+    .pre_startup : ALIGN(512) {
         KEEP(*(.isr_vector))
         KEEP(*(.text.Reset_Handler))
+        KEEP(*(.text._startup))
         KEEP(*(.text.init_mem))
         *:libc_a-memset.o(.text)
         *:libc_a-memcpy-stub.o(.text)
@@ -11,36 +12,41 @@ SECTIONS
         *(.text.memcpy)
 
         . = ALIGN(4);
-        __init_array_start = .;
+        PROVIDE_HIDDEN (__preinit_array_start = .);
+        KEEP (*(.preinit_array*))
+        PROVIDE_HIDDEN (__preinit_array_end = .);
+
+        PROVIDE_HIDDEN (__init_array_start = .);
+        KEEP (*(SORT(.init_array.*)))
+        KEEP (*(.init_array*))
         KEEP(*(.init_array))      /* static constructors */
         KEEP(*(.ctors))           /* static constructors */
-        __init_array_end = .;
+        PROVIDE_HIDDEN (__init_array_end = .);
     } > RESET_FLASH
 
-    .main : {
-        . = ALIGN(4);
+    .main : ALIGN(4) {
         *(.text.main*)
     } > FLASH
 
-    .fast_text : {
-        . = ALIGN(4);
+    .fast_text : ALIGN(4) {
         fast_text_start = .;
         *(.text.*crc*)
         fast_text_end = ALIGN(4);
     } > FAST_CODE_RAM AT>FLASH
     fast_text_load_start = LOADADDR(.fast_text);
+    fast_text_load_size = SIZEOF(.fast_text);
 
-    .fast_data : {
-        . = ALIGN(4);
+    .fast_data : ALIGN(4) {
         fast_data_start = .;
         *(.rodata.*crc*)
+        . = ALIGN(4);
         *(.data.*crc*)
         fast_data_end = ALIGN(4);
     } > FAST_DATA_RAM AT>FLASH
     fast_data_load_start = LOADADDR(.fast_data);
+    fast_data_load_size = SIZEOF(.fast_data);
 
-    .text : {
-        . = ALIGN(4);
+    .text : ALIGN(4) {
         *(.text)           /* .text sections (code) */
         *(.text*)          /* .text* sections (code) */
         *(.glue_7)         /* glue arm to thumb code */
@@ -50,52 +56,28 @@ SECTIONS
         KEEP (*(.init))
         KEEP (*(.fini))
 
-        . = ALIGN(4);
-        _etext = .;        /* define a global symbols at end of code */
+        _etext = ALIGN(4);        /* define a global symbols at end of code */
     } > FLASH
 
-    .rodata : {
-        . = ALIGN(4);
+    .rodata : ALIGN(4) {
         /* .rodata sections (constants, strings, etc.) */
         *(.rodata)
         *(.rodata*)
     } > FLASH
 
-    .ARM.extab (READONLY) : /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
+    .ARM.extab (READONLY) : ALIGN(4) /* The "READONLY" keyword is only supported in GCC11 and later, remove it if using GCC10 or earlier. */
     {
-        . = ALIGN(4);
         *(.ARM.extab* .gnu.linkonce.armextab.*)
-        . = ALIGN(4);
     } >FLASH
 
-    .ARM (READONLY) :
-    {
-        . = ALIGN(4);
+    .ARM (READONLY) : ALIGN(4) {
         __exidx_start = .;
         *(.ARM.exidx*)
         __exidx_end = .;
     } >FLASH
 
-    .preinit_array (READONLY) :
-    {
-        . = ALIGN(4);
-        PROVIDE_HIDDEN (__preinit_array_start = .);
-        KEEP (*(.preinit_array*))
-        PROVIDE_HIDDEN (__preinit_array_end = .);
-    } >FLASH
 
-    .init_array (READONLY) :
-    {
-        . = ALIGN(4);
-        PROVIDE_HIDDEN (__init_array_start = .);
-        KEEP (*(SORT(.init_array.*)))
-        KEEP (*(.init_array*))
-        PROVIDE_HIDDEN (__init_array_end = .);
-    } >FLASH
-
-    .fini_array (READONLY) :
-    {
-        . = ALIGN(4);
+    .fini_array (READONLY) : ALIGN(4) {
         PROVIDE_HIDDEN (__fini_array_start = .);
         KEEP (*(SORT(.fini_array.*)))
         KEEP (*(.fini_array*))
@@ -103,8 +85,7 @@ SECTIONS
     } >FLASH
 
 
-    .data : {
-        . = ALIGN(4);
+    .data : ALIGN(4) {
         data_start = .;
         *(.data)           /* .data sections */
         *(.data*)          /* .data* sections */
@@ -113,20 +94,20 @@ SECTIONS
         data_end = ALIGN(4);
     } > RAM AT> FLASH
     data_load_start = LOADADDR(.data);
+    data_load_size = SIZEOF(.data);
 
-    .bss : {
-        . = ALIGN(4);
+    .bss (NOLOAD): ALIGN(4) {
         bss_start = .;
         __bss_start__ = .;
         *(.bss)
         *(.bss*)
         *(COMMON)
         bss_end = ALIGN(4);
-        __bss_end__ = .;
+        __bss_end__ = ALIGN(4);
     } > RAM
+    bss_size = SIZEOF(.bss);
 
-    .heap : {
-        . = ALIGN(8);
+    .heap (NOLOAD): ALIGN(8) {
         heap_start = .;
         . += 0x00;
         heap_end = ALIGN(8);
@@ -134,14 +115,13 @@ SECTIONS
         __end__ = .;
     } > HEAP_RAM
 
-    .stack : {
-        . = ALIGN(8);
+    .stack (NOLOAD): ALIGN(8) {
         stack_top = .;
         . += 10K;
         estack = ALIGN(8);
     } > STACK_RAM
 
-    .skip_codes (NOLOAD): {
+    .skip_codes (NOLOAD): ALIGN(4) {
         . += 4;
     } > SKIP_CODES
 }
