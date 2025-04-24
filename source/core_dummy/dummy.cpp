@@ -5,10 +5,7 @@
 
 extern "C" {
 uint32_t application_skip_request = 0;
-extern int bootloader_main();
 }
-
-int main() { return bootloader_main(); }
 
 namespace bootloader {
 bool application_is_valid() noexcept { return true; }

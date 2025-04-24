@@ -14,5 +14,7 @@ Stack_End_Data:
 Reset_Handler:
   cpsid i
   ldr sp, Stack_End_Data
-  bl  init_mem
+  bl init_mem
+  bl main
+  b terminate_program
  // just fall through to init_mem, has to be ensured by the linker

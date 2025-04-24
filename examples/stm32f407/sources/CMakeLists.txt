@@ -43,7 +43,7 @@ target_link_options(libc
 )
 target_link_libraries(config_base INTERFACE libc)
 
-target_sources(bootloader_core PRIVATE reset_arm_cortex.cpp startup.S)
+target_sources(bootloader_core PRIVATE reset_arm_cortex.cpp startup.S startup.cpp)
 target_include_directories(bootloader_core PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 target_include_directories(bootloader_core PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 

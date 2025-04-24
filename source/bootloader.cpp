@@ -33,17 +33,16 @@ bool restore_application_from_backup() noexcept {
 }
 } // namespace
 
-extern "C" int bootloader_main() noexcept {
+extern "C" int main() noexcept {
     const bool application_valid = launch_application();
     if (!application_valid) {
         if (restore_application_from_backup()) {
             launch_application();
+            // failed to launch after updateing
+            return 2;
         }
+        return 1;
     }
-
     // failed to launch, the application is not valid, so is the backup
-    for (;;) {
-        // wait for communication
-        // and have a timeout here, if the application is valid, that is
-    }
+    return 0;
 }
