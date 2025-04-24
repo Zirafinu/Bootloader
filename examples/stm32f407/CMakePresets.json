@@ -11,7 +11,7 @@
             "hidden": true,
             "generator":"Ninja",
             "binaryDir":"${sourceDir}/build/${presetName}",
-            "toolchainFile": "toolchain/arm_none_eabi.cmake"
+            "toolchainFile": "cmake/arm_none_eabi.cmake"
         },
         {"name": "Release", "inherits": "default", "cacheVariables": {"CMAKE_BUILD_TYPE":"Release"}},
         {"name": "Debug", "inherits": "default", "cacheVariables": {"CMAKE_BUILD_TYPE":"Debug"}}

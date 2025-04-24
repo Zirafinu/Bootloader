@@ -3,6 +3,7 @@ target_include_directories(bootloader_core PRIVATE
     Drivers/STM32F4xx_HAL_Driver/Inc/Legacy
     Drivers/CMSIS/Device/ST/STM32F4xx/Include
     Drivers/CMSIS/Include
+    ${CMAKE_CURRENT_LIST_DIR}
 )
 target_compile_definitions(bootloader_core PRIVATE
 	USE_FULL_LL_DRIVER
