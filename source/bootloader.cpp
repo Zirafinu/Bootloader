@@ -5,44 +5,48 @@
 namespace {
 
 /**
- * @return true if the application is valid.
+ * @return true if the application is should be replaced.
  */
 bool launch_application() noexcept {
     if (skip_application::skip_is_requested()) {
         skip_application::skip_reset_request();
-        return true;
-    }
-    if (skip_application::update_is_requested()) {
-        skip_application::update_reset_request();
         return false;
     }
 
+    if (skip_application::update_is_requested()) {
+        skip_application::update_reset_request();
+        return true;
+    }
+
     if (!bootloader::application_is_valid()) {
-        return false;
+        return true;
     }
 
     bootloader::jump_to_application();
 }
 
-bool restore_application_from_backup() noexcept {
-    if (!bootloader::application_backup_is_valid()) {
+/**
+ * @return true if the application was replaced
+ */
+bool update_application() noexcept {
+    if (!bootloader::application_update_is_valid()) {
         return false;
     }
 
-    return bootloader::copy_backup_to_application();
+    return bootloader::copy_update_to_application();
 }
 } // namespace
 
 extern "C" int main() noexcept {
-    const bool application_valid = launch_application();
-    if (!application_valid) {
-        if (restore_application_from_backup()) {
+    const bool is_update_pending = launch_application();
+    if (is_update_pending) {
+        if (update_application()) {
             launch_application();
             // failed to launch after updateing
             return 2;
         }
         return 1;
     }
-    // failed to launch, the application is not valid, so is the backup
+    // application requested skipping
     return 0;
 }

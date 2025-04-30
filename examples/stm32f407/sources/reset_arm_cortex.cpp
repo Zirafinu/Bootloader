@@ -99,13 +99,13 @@ bool application_is_valid() noexcept {
                         reinterpret_cast<uint8_t *>(flash_layout::application_end - 4));
 }
 
-bool application_backup_is_valid() noexcept {
+bool application_update_is_valid() noexcept {
     return *reinterpret_cast<uint32_t *>(flash_layout::update_end - 4) ==
            crc::compute(reinterpret_cast<uint8_t *>(flash_layout::update_begin),
                         reinterpret_cast<uint8_t *>(flash_layout::update_end - 4));
 }
 
-bool copy_backup_to_application() noexcept {
+bool copy_update_to_application() noexcept {
     initialize_HAL_GetTick();
 
     if (!erase_application())
