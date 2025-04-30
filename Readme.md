@@ -36,6 +36,9 @@ It features read and write callbacks, to allow for extended computations when in
 
 ## Testing
 It's minimal, i promise :-P
+In the example tests can be executed in a qemu vm or on target.
+When run on the target the tests are linked into RAM, so that Flash doesn't forfeit after a weeks worth of tests.
+Tests, that are marked with HARDWARE_IN_THE_LOOP are only executed on the target.
 
 # How to Build
 To run the "tests" for the default implementations run the following command and see where it gets you:
