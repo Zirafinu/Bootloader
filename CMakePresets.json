@@ -11,28 +11,28 @@
             "generator":"Ninja",
             "binaryDir":"${sourceDir}/build/${presetName}"
         },
-        {"name": "Release", "cacheVariables": {"CMAKE_BUILD_TYPE":"Release"}},
-        {"name": "Debug", "cacheVariables": {"CMAKE_BUILD_TYPE":"Debug"}}
+        {"name": "Release", "inherits":["default"], "cacheVariables": {"CMAKE_BUILD_TYPE":"Release"}},
+        {"name": "Debug", "inherits":["default"], "cacheVariables": {"CMAKE_BUILD_TYPE":"Debug"}}
     ],
     "buildPresets":[
         {
-            "name": "default", "configurePreset": "default"
+            "name": "Debug", "configurePreset": "Debug"
         }
     ],
     "testPresets":[
         {
-            "name": "default",
-            "configurePreset": "default",
+            "name": "Debug",
+            "configurePreset": "Debug",
             "output": {"outputOnFailure": true}
         }
     ],
     "workflowPresets": [
         {
-            "name": "default",
+            "name": "Debug",
             "steps": [
-                { "type": "configure", "name":"default" },
-                { "type": "build", "name": "default" },
-                { "type": "test", "name" : "default" }
+                { "type": "configure", "name":"Debug" },
+                { "type": "build", "name": "Debug" },
+                { "type": "test", "name" : "Debug" }
             ]
         }
     ]
