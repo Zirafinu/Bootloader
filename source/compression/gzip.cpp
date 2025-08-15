@@ -93,7 +93,7 @@ int construct(Tree_Count_t &tree_count, uint16_t *tree_symbols, const uint8_t *l
     return left;
 }
 
-auto Inflate::SymbolHuffmanTree::construct_fixed() noexcept -> SymbolHuffmanTree {
+auto detail::SymbolHuffmanTree::construct_fixed() noexcept -> SymbolHuffmanTree {
     std::array<uint8_t, FIXED_LITERAL_LENGTH_CODES> lengths{};
     std::memset(&lengths[0], 8, 144);
     std::memset(&lengths[144], 9, 256 - 144);
@@ -105,7 +105,7 @@ auto Inflate::SymbolHuffmanTree::construct_fixed() noexcept -> SymbolHuffmanTree
     return result;
 }
 
-auto Inflate::DistanceHuffmanTree::construct_fixed() noexcept -> DistanceHuffmanTree {
+auto detail::DistanceHuffmanTree::construct_fixed() noexcept -> DistanceHuffmanTree {
     std::array<uint8_t, MAX_DISTANCE_CODES> lengths;
     std::memset(&lengths[0], 5, MAX_DISTANCE_CODES);
 
@@ -119,6 +119,7 @@ bool Inflate::decode() noexcept {
         const auto bits = read_bits(3);
 
         bool failed = true;
+        using Block_Type_t = detail::Block_Type_t;
         switch (static_cast<Block_Type_t>((bits >> 1) & 0x3)) {
         case Block_Type_t::Stored:
             failed = inflate_stored();
@@ -149,10 +150,6 @@ uint32_t Inflate::read_bits(std::size_t count) noexcept {
     }
 
     mBit_Count -= count;
-    if (count >= 32) { // shift would have invalid length
-        return mBit_Buffer;
-    }
-
     uint32_t result = mBit_Buffer & ((1U << count) - 1);
     mBit_Buffer >>= count;
     return result;
@@ -176,22 +173,22 @@ bool Inflate::inflate_stored() noexcept {
 }
 
 bool Inflate::inflate_fixed() noexcept {
-    mLiteral_tree = SymbolHuffmanTree::construct_fixed();
-    mDistance_tree = DistanceHuffmanTree::construct_fixed();
+    mLiteral_tree = detail::SymbolHuffmanTree::construct_fixed();
+    mDistance_tree = detail::DistanceHuffmanTree::construct_fixed();
     return codes();
 }
 
 bool Inflate::inflate_dynamic() noexcept {
-    int err;                                /* construct() return value */
-    uint8_t lengths[MAX_LENGTH_CODE_COUNT]; /* descriptor code lengths */
-    static const short order[19] =          /* permutation of code length codes */
+    int err;                                        /* construct() return value */
+    uint8_t lengths[detail::MAX_LENGTH_CODE_COUNT]; /* descriptor code lengths */
+    static const short order[19] =                  /* permutation of code length codes */
         {16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
 
     /* get number of lengths in each table, check lengths */
     const std::size_t nlen = read_bits(5) + 257;
     const std::size_t ndist = read_bits(5) + 1;
     const std::size_t ncode = read_bits(4) + 4;
-    if (nlen > MAX_LITERAL_LENGTH_CODES || ndist > MAX_DISTANCE_CODES)
+    if (nlen > detail::MAX_LITERAL_LENGTH_CODES || ndist > detail::MAX_DISTANCE_CODES)
         return true; /* bad counts */
 
     /* read code length code lengths (really), missing lengths are zero */
@@ -306,41 +303,31 @@ bool Inflate::codes() noexcept {
     return true;
 }
 
-int32_t Inflate::decode_symbol() noexcept {
-    int code = 0;  /* len bits being decoded */
-    int first = 0; /* first code of length len */
-    int count = 0; /* number of codes of length len */
-    int index = 0; /* index of first code of length len in symbol table */
+int32_t Inflate::decode_(const uint8_t *const counts, const uint16_t *symbols) noexcept {
+    size_t code = 0;  /* len bits being decoded */
+    size_t first = 0; /* first code of length len */
 
-    for (size_t len = 1; len <= MAX_BITS; ++len) {
-        code |= read_bits(1); /* get next bit */
-        count = mLiteral_tree.count[len];
-        if (code - count < first) /* if length len, return symbol */
-            return mLiteral_tree.symbols[index + (code - first)];
-        index += count; /* else update for next length */
-        first += count;
-        first <<= 1;
-        code <<= 1;
+    size_t len = 1;
+    for (;;) {
+        for (; mBit_Count > 0; ++len) {
+            code |= mBit_Buffer & 1; /* read bit */
+            mBit_Buffer >>= 1;
+            --mBit_Count;
+            const size_t count = counts[len]; /* number of codes of length len */
+            if (code - first < count) {       /* if length len, return symbol */
+                return symbols[code - first];
+            }
+
+            symbols += count; /* else update for next length */
+            first = (first + count) << 1;
+            code <<= 1;
+            if (len >= detail::MAX_BITS) {
+                return -10;
+            }
+        }
+        mBit_Count = 8;
+        mBit_Buffer = read();
     }
-    return -10; /* ran out of codes */
 }
 
-int8_t Inflate::decode_distance() noexcept {
-    int code = 0;  /* len bits being decoded */
-    int first = 0; /* first code of length len */
-    int count = 0; /* number of codes of length len */
-    int index = 0; /* index of first code of length len in symbol table */
-
-    for (size_t len = 1; len <= MAX_BITS; ++len) {
-        code |= read_bits(1); /* get next bit */
-        count = mDistance_tree.count[len];
-        if (code - count < first) /* if length len, return symbol */
-            return mDistance_tree.symbols[index + (code - first)];
-        index += count; /* else update for next length */
-        first += count;
-        first <<= 1;
-        code <<= 1;
-    }
-    return -10; /* ran out of codes */
-}
 } // namespace gzip
