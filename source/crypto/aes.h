@@ -170,18 +170,76 @@ static state_t &transpose(state_t &state) {
     uint32_t s0 = state[0];
     uint32_t s1 = state[1];
 
-    uint32_t r_0189 = (s0 & 0xFF00FF00) | ((s1 & 0xFF00FF00) >> 8);
-    uint32_t r_45CD = ((s0 & 0xFF00FF) << 8) | (s1 & 0xFF00FF);
+    constexpr uint32_t low_mask = 0xFF00FF00;
+    constexpr uint32_t high_mask = 0xFF00FF;
+
+    uint32_t r_0189 = (s0 & low_mask) | ((s1 & low_mask) >> 8);
+    uint32_t r_45CD = ((s0 & high_mask) << 8) | (s1 & high_mask);
 
     uint32_t s2 = state[2];
     uint32_t s3 = state[3];
-    uint32_t r_23AB = (s2 & 0xFF00FF00) | ((s3 & 0xFF00FF00) >> 8);
-    uint32_t r_67EF = ((s2 & 0xFF00FF) << 8) | (s3 & 0xFF00FF);
+    uint32_t r_23AB = (s2 & low_mask) | ((s3 & low_mask) >> 8);
+    uint32_t r_67EF = ((s2 & high_mask) << 8) | (s3 & high_mask);
 
-    state[0] = ((r_0189 & 0xFFFF0000)) | ((r_23AB & 0xFFFF0000) >> 16);
-    state[1] = ((r_45CD & 0xFFFF0000)) | ((r_67EF & 0xFFFF0000) >> 16);
-    state[2] = ((r_0189 & 0xFFFF) << 16) | ((r_23AB & 0xFFFF));
-    state[3] = ((r_45CD & 0xFFFF) << 16) | ((r_67EF & 0xFFFF));
+    constexpr uint32_t top = 0xFFFF0000;
+    constexpr uint32_t bottom = 0xFFFF;
+
+    state[0] = ((r_0189 & top)) | ((r_23AB & top) >> 16);
+    state[1] = ((r_45CD & top)) | ((r_67EF & top) >> 16);
+    state[2] = ((r_0189 & bottom) << 16) | ((r_23AB & bottom));
+    state[3] = ((r_45CD & bottom) << 16) | ((r_67EF & bottom));
+    return state;
+}
+
+static state_t &state_to_bytes(state_t &state) {
+    uint32_t s0 = state[0];
+    uint32_t s1 = state[1];
+
+    constexpr uint32_t low_mask = 0xFF00FF00;
+    constexpr uint32_t high_mask = 0xFF00FF;
+
+    uint32_t r_1098 = ((s0 & low_mask) >> 8) | (s1 & low_mask);
+    uint32_t r_54DC = (s0 & high_mask) | ((s1 & high_mask) << 8);
+
+    uint32_t s2 = state[2];
+    uint32_t s3 = state[3];
+    uint32_t r_32BA = ((s2 & low_mask) >> 8) | ((s3 & low_mask));
+    uint32_t r_76FE = ((s2 & high_mask)) | ((s3 & high_mask) << 8);
+
+    constexpr uint32_t top = 0xFFFF0000;
+    constexpr uint32_t bottom = 0xFFFF;
+
+    state[0] = ((r_1098 & top) >> 16) | ((r_32BA & top));
+    state[1] = ((r_54DC & top) >> 16) | ((r_76FE & top));
+    state[2] = ((r_1098 & bottom)) | ((r_32BA & bottom) << 16);
+    state[3] = ((r_54DC & bottom)) | ((r_76FE & bottom) << 16);
+    return state;
+}
+
+static state_t &bytes_to_state(state_t &state) {
+    uint32_t s0 = state[0];
+    uint32_t s1 = state[1];
+
+    constexpr uint32_t low_mask = 0xFF00FF;
+    constexpr uint32_t high_mask = ~low_mask;
+
+    // bC b8 b4 b0
+
+    uint32_t r_8901 = ((s0 & low_mask) << 8) | (s1 & low_mask);
+    uint32_t r_CD45 = (s0 & high_mask) | ((s1 & high_mask) >> 8);
+
+    uint32_t s2 = state[2];
+    uint32_t s3 = state[3];
+    uint32_t r_AB23 = ((s2 & low_mask) << 8) | ((s3 & low_mask));
+    uint32_t r_EF67 = ((s2 & high_mask)) | ((s3 & high_mask) >> 8);
+
+    constexpr uint32_t top = 0xFFFF0000;
+    constexpr uint32_t bottom = ~top;
+
+    state[0] = ((r_8901 & bottom) << 16) | ((r_AB23 & bottom));
+    state[1] = ((r_CD45 & bottom) << 16) | ((r_EF67 & bottom));
+    state[2] = ((r_8901 & top)) | ((r_AB23 & top) >> 16);
+    state[3] = ((r_CD45 & top)) | ((r_EF67 & top) >> 16);
     return state;
 }
 
@@ -218,7 +276,7 @@ template <typename key_t> static auto expand_key(const key_t &key) {
 } // namespace Common
 
 template <typename expanded_keys_t> static void encrypt(state_t &data, const expanded_keys_t &keys) {
-    Common::transpose(data);
+    Common::bytes_to_state(data);
     Common::add_round_key(data, keys.front());
     for (auto i = 1U; i < keys.size() - 1; ++i) {
         Encryption::substitute_bytes(data);
@@ -229,11 +287,11 @@ template <typename expanded_keys_t> static void encrypt(state_t &data, const exp
     Encryption::substitute_bytes(data);
     Encryption::row_shift(data);
     Common::add_round_key(data, keys.back());
-    Common::transpose(data);
+    Common::state_to_bytes(data);
 }
 
 template <typename expanded_keys_t> static void decrypt(state_t &data, const expanded_keys_t &keys) {
-    Common::transpose(data);
+    Common::bytes_to_state(data);
     Common::add_round_key(data, keys.back());
     Decryption::row_shift(data);
     Decryption::substitute_bytes(data);
@@ -244,7 +302,7 @@ template <typename expanded_keys_t> static void decrypt(state_t &data, const exp
         Decryption::substitute_bytes(data);
     }
     Common::add_round_key(data, keys.front());
-    Common::transpose(data);
+    Common::state_to_bytes(data);
 }
 
 } // namespace AES
