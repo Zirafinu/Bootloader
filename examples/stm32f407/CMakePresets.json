@@ -1,45 +1,95 @@
 {
-    "version": 8,
-    "cmakeMinimumRequired":{
-        "major": 3,
-        "minor":28,
-        "patch": 0
+  "version": 8,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 28,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "default",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "toolchainFile": "cmake/arm_none_eabi.cmake"
     },
-    "configurePresets":[
+    {
+      "name": "Release",
+      "inherits": "default",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "TEST_ON_TARGET": "1"
+      }
+    },
+    {
+      "name": "Debug_in_qemu",
+      "inherits": "default",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "TEST_ON_TARGET": "0"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "Release",
+      "configurePreset": "Release"
+    },
+    {
+      "name": "Debug_in_qemu",
+      "configurePreset": "Debug_in_qemu"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "Release",
+      "configurePreset": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "Debug_in_qemu",
+      "configurePreset": "Debug_in_qemu",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "Release",
+      "steps": [
         {
-            "name":"default",
-            "hidden": true,
-            "generator":"Ninja",
-            "binaryDir":"${sourceDir}/build/${presetName}",
-            "toolchainFile": "cmake/arm_none_eabi.cmake"
+          "type": "configure",
+          "name": "Release"
         },
-        {"name": "Release", "inherits": "default", "cacheVariables": {"CMAKE_BUILD_TYPE":"Release", "TEST_ON_TARGET": "1"}},
-        {"name": "Debug", "inherits": "default", "cacheVariables": {"CMAKE_BUILD_TYPE":"Debug", "TEST_ON_TARGET": "0"}}
-    ],
-    "buildPresets":[
-        {"name": "Release", "configurePreset": "Release"},
-        {"name": "Debug", "configurePreset": "Debug"}
-    ],
-    "testPresets": [
-        {"name": "Release", "configurePreset": "Release", "output": {"outputOnFailure":true}},
-        {"name": "Debug", "configurePreset": "Debug", "output": {"outputOnFailure":true}}
-    ],
-    "workflowPresets": [
         {
-            "name": "Release",
-            "steps": [
-                { "type": "configure", "name":"Release" },
-                { "type": "build", "name": "Release" },
-                { "type": "test", "name": "Release" }
-            ]
+          "type": "build",
+          "name": "Release"
         },
         {
-            "name": "Debug",
-            "steps": [
-                { "type": "configure", "name":"Debug" },
-                { "type": "build", "name": "Debug" },
-                { "type": "test", "name": "Debug" }
-            ]
+          "type": "test",
+          "name": "Release"
         }
-    ]
+      ]
+    },
+    {
+      "name": "Debug_in_qemu",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Debug_in_qemu"
+        },
+        {
+          "type": "build",
+          "name": "Debug_in_qemu"
+        },
+        {
+          "type": "test",
+          "name": "Debug_in_qemu"
+        }
+      ]
+    }
+  ]
 }
