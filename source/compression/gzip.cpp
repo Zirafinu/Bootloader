@@ -1,4 +1,6 @@
 #include "gzip.h"
+#include <crc.h>
+
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
@@ -8,6 +10,7 @@ namespace gzip {
 
 Header Header::parse(uint8_t const *start, uint8_t const *end) {
     Header result{};
+    result.length = 0;
     if (end < (start + 10)) {
         return result;
     }
@@ -25,26 +28,44 @@ Header Header::parse(uint8_t const *start, uint8_t const *end) {
     result.os = start[9];
     std::size_t length = 10;
     if (uint8_t(result.flags) & uint8_t(Flags::EXTRA)) {
+        if (end < &start[length + 2])
+            return result;
         result.extra_length = start[length] | (start[length + 1] << 8);
         length += 2;
+
+        if (end < &start[length + result.extra_length])
+            return result;
         result.extra_data = &start[length];
         length += result.extra_length;
     }
     if (uint8_t(result.flags) & uint8_t(Flags::NAME)) {
         result.name = &start[length];
-        while (start[length] != 0)
+        while (start[length] != 0) {
+            if (end < &start[length + 1])
+                return result;
             length++;
+        }
         length += 1;
     }
     if (uint8_t(result.flags) & uint8_t(Flags::COMMENT)) {
         result.comment = &start[length];
-        while (start[length] != 0)
+        while (start[length] != 0) {
+            if (end < &start[length + 1])
+                return result;
             length++;
+        }
         length += 1;
     }
     if (uint8_t(result.flags) & uint8_t(Flags::HCRC)) {
+        if (end < &start[length + 2])
+            return result;
+        uint16_t const stored_crc = start[length] | (uint16_t(start[length + 1]) << 8);
+        uint16_t const computed_crc = uint16_t(crc::compute(start, &start[length]));
+        if (stored_crc != computed_crc)
+            return result;
         length += 2;
     }
+
     result.length = length;
     return result;
 }
