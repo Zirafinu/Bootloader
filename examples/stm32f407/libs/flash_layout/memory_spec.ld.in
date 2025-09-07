@@ -1,0 +1,13 @@
+MEMORY
+{
+    FLASH_TOTAL (rx) : ORIGIN = ${total_begin},  LENGTH = ${total_size}
+}
+
+MEMORY {
+    FLASH_BOOTLOADER  (rx) : ORIGIN = ${bootl_begin}, LENGTH = ${bootl_size}
+    FLASH_APPLICATION (rx) : ORIGIN = ${appli_begin}, LENGTH = ${appli_size}
+    FLASH_UPDATE      (rx) : ORIGIN = ${updat_begin}, LENGTH = ${updat_size}
+    FLASH_PARAMETER   (rx) : ORIGIN = ${param_begin}, LENGTH = ${param_size}
+    FLASH_EVENT_LOG   (rx) : ORIGIN = ${event_begin}, LENGTH = ${event_size}
+    FLASH_RESOURCES   (rx) : ORIGIN = ${recrs_begin}, LENGTH = ${recrs_size}
+}

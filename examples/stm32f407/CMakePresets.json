@@ -11,22 +11,23 @@
       "hidden": true,
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build/${presetName}",
-      "toolchainFile": "cmake/arm_none_eabi.cmake"
+      "toolchainFile": "cube/arm_none_eabi.cmake"
     },
     {
       "name": "Release",
       "inherits": "default",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "TEST_ON_TARGET": "1"
+        "ON_TARGET": "1"
       }
     },
     {
       "name": "Debug_in_qemu",
       "inherits": "default",
+      "toolchainFile": "qemu/arm_none_eabi.cmake",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "TEST_ON_TARGET": "0"
+        "ON_TARGET": "0"
       }
     }
   ],
