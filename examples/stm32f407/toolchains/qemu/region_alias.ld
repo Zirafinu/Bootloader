@@ -7,3 +7,13 @@ REGION_ALIAS("HEAP_RAM", BASE_RAM)
 REGION_ALIAS("RAM", BASE_RAM)
 REGION_ALIAS("SKIP_CODES", BASE_RAM)
 
+ENTRY(_start)
+
+SECTIONS
+{
+    /* initialize the minimal vector table */
+    .ISR_VECTOR_QEMU_PATCH : ALIGN(512) {
+        LONG(estack);
+        LONG(_start+1);
+    } > FLASH
+}

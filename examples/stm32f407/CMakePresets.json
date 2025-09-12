@@ -10,24 +10,22 @@
       "name": "default",
       "hidden": true,
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build/${presetName}",
-      "toolchainFile": "cube/arm_none_eabi.cmake"
+      "binaryDir": "${sourceDir}/build/${presetName}"
     },
     {
       "name": "Release",
       "inherits": "default",
+      "toolchainFile": "toolchains/target/toolchain_target.cmake",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "ON_TARGET": "1"
+        "CMAKE_BUILD_TYPE": "Release"
       }
     },
     {
-      "name": "Debug_in_qemu",
+      "name": "test_in_qemu",
       "inherits": "default",
-      "toolchainFile": "qemu/arm_none_eabi.cmake",
+      "toolchainFile": "toolchains/qemu/toolchain_qemu.cmake",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "ON_TARGET": "0"
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     }
   ],
@@ -37,8 +35,8 @@
       "configurePreset": "Release"
     },
     {
-      "name": "Debug_in_qemu",
-      "configurePreset": "Debug_in_qemu"
+      "name": "test_in_qemu",
+      "configurePreset": "test_in_qemu"
     }
   ],
   "testPresets": [
@@ -50,8 +48,8 @@
       }
     },
     {
-      "name": "Debug_in_qemu",
-      "configurePreset": "Debug_in_qemu",
+      "name": "test_in_qemu",
+      "configurePreset": "test_in_qemu",
       "output": {
         "outputOnFailure": true
       }
@@ -76,19 +74,19 @@
       ]
     },
     {
-      "name": "Debug_in_qemu",
+      "name": "test_in_qemu",
       "steps": [
         {
           "type": "configure",
-          "name": "Debug_in_qemu"
+          "name": "test_in_qemu"
         },
         {
           "type": "build",
-          "name": "Debug_in_qemu"
+          "name": "test_in_qemu"
         },
         {
           "type": "test",
-          "name": "Debug_in_qemu"
+          "name": "test_in_qemu"
         }
       ]
     }

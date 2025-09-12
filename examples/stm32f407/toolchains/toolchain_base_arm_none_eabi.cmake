@@ -46,7 +46,7 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 # -mfloat-abi=hard  float abi
 # -mthumb           Generat thumb instructions.
 # -mabi=aapcs       Defines enums to be a variable sized type.
-set(CPU_GEN_FLAGS "-mcpu=cortex-m4 -mthumb -mabi=aapcs -mfpu=fpv4-sp-d16 -mfloat-abi=hard")
+set(CPU_GEN_FLAGS "-mcpu=cortex-m4 -mthumb -mabi=aapcs -mfpu=fpv4-sp-d16 -mfloat-abi=hard ${ADDITIONAL_COMPILE_AND_LINK_FLAGS}")
 
 # Warning Flags
 # -Wall -Wextra -Wpedantic  Print all warnings
@@ -61,14 +61,14 @@ set(WARNING_FLAGS "-Wall -Wextra -Wpedantic -Werror")
 set(OBJECT_GEN_FLAGS "${CPU_GEN_FLAGS} ${WARNING_FLAGS} -fno-builtin -ffunction-sections -fdata-sections -fomit-frame-pointer")
 
 set(CMAKE_C_FLAGS_INIT   "${OBJECT_GEN_FLAGS} " CACHE INTERNAL "C Compiler options")
-set(CMAKE_CXX_FLAGS_INIT "${OBJECT_GEN_FLAGS} " CACHE INTERNAL "C++ Compiler options")
+set(CMAKE_CXX_FLAGS_INIT "${OBJECT_GEN_FLAGS} -fno-threadsafe-statics " CACHE INTERNAL "C++ Compiler options")
 set(CMAKE_ASM_FLAGS_INIT "${OBJECT_GEN_FLAGS} -x assembler-with-cpp  -MMD -MP " CACHE INTERNAL "ASM Compiler options")
 
 
 # -Wl,--gc-sections     Perform the dead code elimination.
 # --specs=nano.specs    Link with newlib-nano.
 # --specs=nosys.specs   No syscalls, provide empty implementations for the POSIX system calls.
-set(CMAKE_EXE_LINKER_FLAGS_INIT "${CPU_GEN_FLAGS} -Wl,--gc-sections -e_start " CACHE INTERNAL "Linker options")
+set(CMAKE_EXE_LINKER_FLAGS_INIT " -Wl,--gc-sections ${ADDITIONAL_EXEC_LINKER_FLAGS}" CACHE INTERNAL "Linker options")
 
 #---------------------------------------------------------------------------------------
 # Set debug/release build configuration Options
@@ -104,34 +104,3 @@ set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
-#---------------------------------------------------------------------------------------
-# configure flash_layout library
-#---------------------------------------------------------------------------------------
-set(total_begin 0x00000000)
-set(bootl_begin 0x00000000)
-set(param_begin 0x00002000)
-set(event_begin 0x00004000)
-set(recrs_begin 0x00006000)
-set(appli_begin 0x00008000)
-set(updat_begin 0x00080000)
-
-set(total_size 4*1024*1024)
-set(bootl_size 16*1024)
-set(param_size 16*1024)
-set(event_size 16*1024)
-set(recrs_size 16*1024)
-set(appli_size 576*1024+3*1024*1024)
-set(updat_size 384*1024)
-
-set(HOMOGENOUS_PAGED_AREA_INITIALIZER "{0x00000000, 0x00200000, 0, 1024}")
-
-#---------------------------------------------------------------------------------------
-# specify the unit test runner
-#---------------------------------------------------------------------------------------
-set(CMAKE_CROSSCOMPILING_EMULATOR
-        qemu-system-arm
-        -cpu cortex-m4 -machine mps2-an386
-        -monitor none -nographic
-        -serial null -semihosting
-        -kernel # command to run here
-)
