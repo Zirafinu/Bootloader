@@ -15,4 +15,6 @@ target_link_libraries(stm32f407_bootloader PRIVATE
     Bootloader::gzip
 )
 
-
+add_executable(blinky blinky.cpp)
+target_link_libraries(blinky PRIVATE linkage_application)
+encrypt_target(blinky)
