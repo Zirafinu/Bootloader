@@ -5,8 +5,7 @@ target_link_libraries(linkage_bootloader INTERFACE cube)
 target_link_libraries(linkage_test INTERFACE cube)
 target_link_libraries(linkage_application INTERFACE cube)
 
-add_executable(stm32f407_bootloader)
-target_sources(stm32f407_bootloader PRIVATE bootloader_impl.cpp)
+add_executable(stm32f407_bootloader bootloader_impl.cpp)
 target_link_libraries(stm32f407_bootloader PRIVATE
     linkage_bootloader
     flash_layout
