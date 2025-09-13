@@ -1,28 +1,12 @@
-add_library(cube INTERFACE)
-target_include_directories(cube INTERFACE
-    Drivers/STM32F4xx_HAL_Driver/Inc
-    Drivers/STM32F4xx_HAL_Driver/Inc/Legacy
-    Drivers/CMSIS/Device/ST/STM32F4xx/Include
-    Drivers/CMSIS/Include
-    ${CMAKE_CURRENT_LIST_DIR}
-)
-target_compile_definitions(cube INTERFACE
-	USE_FULL_LL_DRIVER
-	STM32F407xx
-	USE_HAL_DRIVER
-)
-target_sources(cube INTERFACE
-    Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c
-    Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c
-    startup.S
-    startup.cpp
-)
+
+add_subdirectory(cube)
+
 target_link_libraries(linkage_bootloader INTERFACE cube)
 target_link_libraries(linkage_test INTERFACE cube)
 target_link_libraries(linkage_application INTERFACE cube)
 
 add_executable(stm32f407_bootloader)
-target_sources(stm32f407_bootloader PRIVATE reset_arm_cortex.cpp)
+target_sources(stm32f407_bootloader PRIVATE bootloader_impl.cpp)
 target_link_libraries(stm32f407_bootloader PRIVATE
     linkage_bootloader
     flash_layout

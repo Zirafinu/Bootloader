@@ -1,5 +1,10 @@
 # artifacts:
 /build/
-/examples/*/build/
 /Testing/
+
+/examples/*/build/
 /examples/*/Testing/
+
+# project files
+.vscode/
+.idea/
