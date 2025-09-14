@@ -70,13 +70,12 @@ Header Header::parse(uint8_t const *start, uint8_t const *end) {
     return result;
 }
 
-template <typename Tree_Count_t = std::array<uint8_t, 16>>
-int construct(Tree_Count_t &tree_count, uint16_t *tree_symbols, const uint8_t *length,
+int construct(std::array<uint8_t, 16> &tree_count, uint16_t *tree_symbols, const uint8_t *length,
               std::size_t symbol_count) noexcept {
     std::remove_cvref_t<decltype(tree_count)> offs; /* offsets in symbol table for each length */
 
     /* count number of codes of each length */
-    std::memset(tree_count.begin(), 0, tree_count.size() * sizeof(tree_count[0]));
+    memset(tree_count.data(), 0, sizeof(tree_count));
 
     for (std::size_t symbol = 0; symbol < symbol_count; ++symbol) { /* assumes lengths are within bounds */
         ++tree_count[length[symbol]];
@@ -86,7 +85,7 @@ int construct(Tree_Count_t &tree_count, uint16_t *tree_symbols, const uint8_t *l
 
     /* check for an over-subscribed or incomplete set of lengths */
     int left = 1; /* one possible code of zero length */
-    for (std::size_t len = 1; len < tree_count.size(); len++) {
+    for (std::size_t len = 1; len < tree_count.size(); ++len) {
         left <<= 1;              /* one more bit, double codes left */
         left -= tree_count[len]; /* deduct count from possible codes */
         if (left < 0) {
@@ -96,7 +95,7 @@ int construct(Tree_Count_t &tree_count, uint16_t *tree_symbols, const uint8_t *l
 
     /* generate offsets into symbol table for each length for sorting */
     offs[1] = 0;
-    for (std::size_t len = 1; len < (tree_count.size() - 1); len++) {
+    for (std::size_t len = 1; len < (tree_count.size() - 1); ++len) {
         offs[len + 1] = offs[len] + tree_count[len];
     }
 
