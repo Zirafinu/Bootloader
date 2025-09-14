@@ -45,7 +45,7 @@ class Flash_Lock {
     ~Flash_Lock() { HAL_FLASH_Lock(); }
 };
 
-static bool erase_application() noexcept {
+bool erase_application() noexcept {
     FLASH_EraseInitTypeDef EraseInit;
     EraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
     EraseInit.Banks = 0xFFffFFff;
@@ -56,18 +56,27 @@ static bool erase_application() noexcept {
     uint32_t SectorError = 0;
     return HAL_OK == HAL_FLASHEx_Erase(&EraseInit, &SectorError);
 }
+} // namespace
 
-static uint8_t const *read_update_flash_it = nullptr;
-static uint8_t *write_application_it = nullptr;
-static size_t write_application_buffer_used = 0;
-alignas(4) static std::array<uint8_t, 1024> write_application_buffer{};
+namespace {
+using decrypt_iterator = crypto::decrypt_iterator<crypto::AES::state_t const *>;
+crypto::read_as_uint8_t<decrypt_iterator> read_iterator{decrypt_iterator{nullptr, {}, nullptr}, 0};
+uint8_t *write_application_it = nullptr;
+size_t write_application_buffer_used = 0;
 
-static bool can_read_more() {
-    return read_update_flash_it < reinterpret_cast<uint8_t const *>(flash_layout::update_end);
+alignas(4) std::array<uint8_t, 1024> write_application_buffer{};
+
+bool can_read_more() {
+    return read_iterator < reinterpret_cast<crypto::AES::state_t const *>(flash_layout::update_end);
 }
-static uint8_t read_update_flash() { return *read_update_flash_it++; }
 
-static bool flush_write_buffer() {
+uint8_t read_update_flash() {
+    const uint8_t result = *read_iterator;
+    ++read_iterator;
+    return result;
+}
+
+bool flush_write_buffer() {
     Flash_Lock lock{};
     for (size_t i = 0; i < write_application_buffer_used &&
                        reinterpret_cast<size_t>(write_application_it) < flash_layout::application_end;
@@ -85,14 +94,14 @@ static bool flush_write_buffer() {
     write_application_buffer_used = 0;
     return true;
 }
-static void write_application(uint8_t value) {
+void write_application(uint8_t value) {
     write_application_buffer[write_application_buffer_used] = value;
     ++write_application_buffer_used;
     if (write_application_buffer_used == write_application_buffer.size()) {
         flush_write_buffer();
     }
 }
-static uint8_t read_application(std::size_t distance) {
+uint8_t read_application(std::size_t distance) {
     if (distance > write_application_buffer_used) {
         return *(write_application_it - (distance - write_application_buffer_used));
     }
@@ -102,15 +111,42 @@ static uint8_t read_application(std::size_t distance) {
 
 namespace bootloader {
 bool application_is_valid() noexcept {
-    return *reinterpret_cast<uint32_t *>(flash_layout::application_end - 4) ==
-           crc::compute(reinterpret_cast<uint8_t *>(flash_layout::application_begin),
-                        reinterpret_cast<uint8_t *>(flash_layout::application_end - 4));
+    if (*reinterpret_cast<uint32_t *>(flash_layout::application_end - 4) !=
+        crc::compute(reinterpret_cast<uint8_t *>(flash_layout::application_begin),
+                     reinterpret_cast<uint8_t *>(flash_layout::application_end - 4)))
+        return false;
+
+    // check if the version info of the application is valid
+    const version::info *application_version_info =
+        reinterpret_cast<version::info const *>(flash_layout::application_end - 4 - sizeof(version::info));
+    if (application_version_info->product_id != version_info_struct.product_id)
+        return false;
+
+    return true;
 }
 
-bool application_update_is_valid() noexcept {
-    return *reinterpret_cast<uint32_t *>(flash_layout::update_end - 4) ==
-           crc::compute(reinterpret_cast<uint8_t *>(flash_layout::update_begin),
-                        reinterpret_cast<uint8_t *>(flash_layout::update_end - 4));
+bool application_update_is_valid(bool is_application_memory_valid) noexcept {
+    if (*reinterpret_cast<uint32_t *>(flash_layout::update_end - 4) !=
+        crc::compute(reinterpret_cast<uint8_t *>(flash_layout::update_begin),
+                     reinterpret_cast<uint8_t *>(flash_layout::update_end - 4)))
+        return false;
+
+    // check if the version info of the application is valid
+    const version::info *update_version_info =
+        reinterpret_cast<version::info const *>(flash_layout::update_begin);
+    if (update_version_info->product_id != version_info_struct.product_id)
+        return false;
+
+    // permit only upgrade
+    if (is_application_memory_valid) {
+        const version::info *application_version_info = reinterpret_cast<version::info const *>(
+            flash_layout::application_end - 4 - sizeof(version::info));
+        if (update_version_info->version >= application_version_info->version ||
+            application_version_info->version == 0xFFffFFffU)
+            return false;
+    }
+
+    return true;
 }
 
 bool copy_update_to_application() noexcept {
@@ -118,16 +154,33 @@ bool copy_update_to_application() noexcept {
 
     if (!erase_application())
         return false;
-    read_update_flash_it = reinterpret_cast<uint8_t const *>(&flash_layout::update_begin);
+    // initialize round keys
+    auto expanded_keys = crypto::AES::Common::expand_key(crypto::AES::key128_t{secrets});
+    // encrypted area starts behind the version info
+    const auto *encrypted_area =
+        reinterpret_cast<crypto::AES::state_t const *>(flash_layout::update_begin + sizeof(version::info));
+    // initialize the AES iterator
+    read_iterator =
+        decltype(read_iterator){decrypt_iterator{encrypted_area + 1, *encrypted_area, &expanded_keys}};
+
+    // initialize the output iterator
     write_application_it =
         reinterpret_cast<uint8_t *>(const_cast<size_t *>(&flash_layout::application_begin));
+
     gzip::Inflate inflator{can_read_more, read_update_flash, write_application, read_application};
-    if (!inflator.decode()) {
+    const bool updated = inflator.decode();
+    memset(expanded_keys.front().data(), 0, sizeof(expanded_keys)); // zero the key
+    if (!updated) {
         return false;
     }
 
     return flush_write_buffer();
 }
 
-void jump_to_application() noexcept { application_entry_function(); }
+void jump_to_application() noexcept {
+    // clear maybe initialized peripherals
+    TIM2->CR1 = 0;
+    RCC->APB1ENR &= ~RCC_APB1ENR_TIM2EN;
+    application_entry_function();
+}
 } // namespace bootloader

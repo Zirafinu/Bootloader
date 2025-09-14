@@ -8,7 +8,7 @@ namespace bootloader {
 [[noreturn]]
 void jump_to_application() noexcept;
 bool application_is_valid() noexcept;
-bool application_update_is_valid() noexcept;
+bool application_update_is_valid(bool is_application_memory_valid) noexcept;
 bool copy_update_to_application() noexcept;
 } // namespace bootloader
 

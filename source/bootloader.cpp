@@ -4,32 +4,39 @@
 
 namespace {
 
+enum class Application_State {
+    Skip,    /// skip was requested
+    Update,  /// update was requested
+    Invalid, /// memory check failed
+};
+
 /**
- * @return true if the application is should be replaced.
+ * @return the reason, why the application didn't start.
  */
-bool launch_application() noexcept {
+Application_State launch_application() noexcept {
     if (skip_application::skip_is_requested()) {
         skip_application::skip_reset_request();
-        return false;
+        return Application_State::Skip;
     }
 
     if (skip_application::update_is_requested()) {
         skip_application::update_reset_request();
-        return true;
+        return Application_State::Update;
     }
 
     if (!bootloader::application_is_valid()) {
-        return true;
+        return Application_State::Invalid;
     }
 
     bootloader::jump_to_application();
 }
 
 /**
+ * @param is_application_memory_valid indicates whether or not the application memory can be trusted
  * @return true if the application was replaced
  */
-bool update_application() noexcept {
-    if (!bootloader::application_update_is_valid()) {
+bool update_application(bool is_application_memory_valid) noexcept {
+    if (!bootloader::application_update_is_valid(is_application_memory_valid)) {
         return false;
     }
 
@@ -38,9 +45,9 @@ bool update_application() noexcept {
 } // namespace
 
 extern "C" int main() noexcept {
-    const bool is_update_pending = launch_application();
-    if (is_update_pending) {
-        if (update_application()) {
+    const Application_State state = launch_application();
+    if (state == Application_State::Invalid || state == Application_State::Update) {
+        if (update_application(state == Application_State::Invalid)) {
             launch_application();
             // failed to launch after updateing
             return 2;
