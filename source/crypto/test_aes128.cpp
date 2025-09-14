@@ -8,7 +8,7 @@ int main(int, char **) {
     const std::array<crypto::AES::state_t, 2> cipher_text = {crypto::AES::state_t{1, 2, 3, 4}, {5, 6, 7, 8}};
 
     // using cipher_text_read_iterator = decltype(cipher_text.begin());
-    auto start = crypto::decrypt_iterator{cipher_text.begin(), iv, keys};
+    auto start = crypto::decrypt_iterator{cipher_text.begin(), iv, &keys};
     const auto end = decltype(start)::make_sentinel(cipher_text.end());
 
     std::array<crypto::AES::state_t, 2> plain_text;
@@ -26,8 +26,7 @@ int main(int, char **) {
     // $> hexdump -e '4/4 "0x%08X, " /0 "\n"' test.bin.aes_cbc
     const std::array<crypto::AES::state_t, 2> expected_plain_text = {
         crypto::AES::state_t{0xCF3D7DD3, 0x21B984FB, 0x5C22D251, 0xD11B2EF0},
-        {0xC1825060, 0xC22D40ED, 0xB155DDA5, 0x04609B83}
-    };
+        {0xC1825060, 0xC22D40ED, 0xB155DDA5, 0x04609B83}};
     if (plain_text != expected_plain_text) {
         return 2;
     }

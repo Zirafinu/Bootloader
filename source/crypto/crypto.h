@@ -10,9 +10,8 @@ namespace crypto {
 /**
  * Implements AES with CBC as a single iterator
  */
-template <typename BaseIterator>
-class decrypt_iterator {
-public:
+template <typename BaseIterator> class decrypt_iterator {
+  public:
     using base_t = BaseIterator;
     using block_t = AES::state_t;
     using expanded_key_t = decltype(AES::Common::expand_key<>(std::declval<AES::key128_t>()));
@@ -24,12 +23,11 @@ public:
     using pointer = value_type *;
     using reference = value_type &;
 
-    explicit decrypt_iterator(base_t input, const block_t &iv, const expanded_key_t &keys)
-        : read_iterator{input}, previous_cipher_text{iv}, expanded_keys{keys} {
-    }
+    explicit decrypt_iterator(base_t input, const block_t &iv, expanded_key_t const *keys)
+        : read_iterator{input}, previous_cipher_text{iv}, expanded_keys{keys} {}
 
     static decrypt_iterator make_sentinel(base_t input) {
-        return decrypt_iterator{input, block_t{}, *std::bit_cast<expanded_key_t *>(nullptr)};
+        return decrypt_iterator{input, block_t{}, nullptr};
     }
 
     decrypt_iterator(const decrypt_iterator &other) = default;
@@ -50,9 +48,13 @@ public:
         return lhs.read_iterator != rhs.read_iterator;
     }
 
+    template <typename T> friend bool operator<(decrypt_iterator const &lhs, T const &rhs) {
+        return lhs.read_iterator < rhs;
+    }
+
     value_type operator*() const {
         auto plain_text = *read_iterator;
-        AES::decrypt(plain_text, expanded_keys);
+        AES::decrypt(plain_text, *expanded_keys);
         std::transform(previous_cipher_text.begin(), previous_cipher_text.end(),
                        // xor previous cipher text with current plain text
                        plain_text.begin(), plain_text.begin(), std::bit_xor{});
@@ -71,18 +73,17 @@ public:
         return *this;
     }
 
-private:
+  private:
     base_t read_iterator;
     value_type previous_cipher_text;
-    const expanded_key_t &expanded_keys;
+    expanded_key_t const *expanded_keys;
 
     static_assert(std::is_same_v<std::remove_cvref_t<decltype(*std::declval<base_t>())>, block_t>,
                   "base iterator type mismatch");
 };
 
-template <typename BaseIterator>
-class read_as_uint8_t {
-public:
+template <typename BaseIterator> class read_as_uint8_t {
+  public:
     using base_t = BaseIterator;
 
     /// implementations for compliance with std::input_iterator
@@ -93,8 +94,7 @@ public:
     using reference = value_type &;
 
     explicit read_as_uint8_t(base_t input, ssize_t in_element_index = -1)
-        : read_iterator{input}, in_element_index{in_element_index} {
-    }
+        : read_iterator{input}, in_element_index{in_element_index} {}
 
     read_as_uint8_t(const read_as_uint8_t &other) = default;
 
@@ -136,7 +136,11 @@ public:
 
     friend bool operator!=(read_as_uint8_t const &lhs, read_as_uint8_t const &rhs) { return !(lhs == rhs); }
 
-private:
+    template <typename T> friend bool operator<(read_as_uint8_t const &lhs, T const &rhs) {
+        return lhs.read_iterator < rhs;
+    }
+
+  private:
     base_t read_iterator;
     mutable ssize_t in_element_index;
     mutable std::remove_cvref_t<decltype(*std::declval<base_t>())> cached_value;
