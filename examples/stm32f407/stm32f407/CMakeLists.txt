@@ -13,8 +13,15 @@ target_link_libraries(stm32f407_bootloader PRIVATE
     Bootloader::skip_application_impl
     Bootloader::crc_impl
     Bootloader::gzip
+    Bootloader::version_info
 )
+update_build_time_and_crc(stm32f407_bootloader)
 
 add_executable(blinky blinky.cpp)
-target_link_libraries(blinky PRIVATE linkage_application)
+target_link_libraries(blinky PRIVATE
+    linkage_application
+    Bootloader::version_info
+)
+
+update_build_time_and_crc(blinky)
 encrypt_target(blinky)

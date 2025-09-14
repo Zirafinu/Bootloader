@@ -1,4 +1,7 @@
 #include <cstdint>
+
+#include <version_info.h>
+
 #include <stm32f407xx.h>
 
 int main() {
@@ -23,3 +26,6 @@ int main() {
 
     return 0;
 }
+
+__attribute__((used))
+const version_info::version_info version_info_struct{0x01'01'00001, 0x000000000, 0x000000000};

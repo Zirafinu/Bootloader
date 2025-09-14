@@ -1,5 +1,6 @@
 add_subdirectory(compression)
 add_subdirectory(skip_application)
+add_subdirectory(version_info)
 add_subdirectory(crc)
 add_subdirectory(crypto)
 
