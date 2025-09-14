@@ -10,7 +10,7 @@ SECTIONS
 {
     /* has to match the size of the version struct */
     .version_info : {
-        KEEP(*(.rodata._ZL19version_info_struct))
+        KEEP(*(.rodata.version_info_struct))
     } > FLASH_BOOTLOADER_INFO
     /* has to match the size of the crc */
     .crc : ALIGN(4) {

@@ -5,6 +5,7 @@
 #include <cstring>
 
 #include <crc.h>
+#include <crypto.h>
 #include <flash_layout.h>
 #include <gzip.h>
 #include <version_info.h>
@@ -125,5 +126,8 @@ bool copy_update_to_application() noexcept {
 void jump_to_application() noexcept { application_entry_function(); }
 } // namespace bootloader
 
-__attribute__((used))
+extern "C" __attribute__((used)) //
 const version_info::version_info version_info_struct{0x01'01'00001, 0x000000000, 0x000000000};
+
+extern "C" __attribute__((used)) //
+const crypto::AES::state_t secrets{};

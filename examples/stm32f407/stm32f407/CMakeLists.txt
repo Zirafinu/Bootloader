@@ -14,6 +14,10 @@ target_link_libraries(stm32f407_bootloader PRIVATE
     Bootloader::crc_impl
     Bootloader::gzip
     Bootloader::version_info
+    Bootloader::crypto_impl
+)
+add_custom_command(TARGET stm32f407_bootloader
+    COMMAND ${CMAKE_OBJCOPY}  ARGS --update-section ".secrets=${CMAKE_CURRENT_LIST_DIR}/../key.bin" $<TARGET_FILE:stm32f407_bootloader>
 )
 update_build_time_and_crc(stm32f407_bootloader)
 add_custom_command(
