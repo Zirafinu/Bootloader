@@ -23,7 +23,7 @@ target_link_options(linkage_bootloader INTERFACE
         -T${CMAKE_CURRENT_LIST_DIR}/region_alias_bootloader.ld # memory mapping for the bootloader
         -T${CMAKE_CURRENT_LIST_DIR}/../section_mapping.ld # default section placement
 )
-set_property(TARGET linkage_bootloader PROPERTY LINK_DEPENDS
+set_property(TARGET linkage_bootloader PROPERTY INTERFACE_LINK_DEPENDS
         ${CMAKE_BINARY_DIR}/memory_spec.ld
         ${CMAKE_CURRENT_LIST_DIR}/region_alias_bootloader.ld
         ${CMAKE_CURRENT_LIST_DIR}/../section_mapping.ld
@@ -38,7 +38,7 @@ target_link_options(linkage_test INTERFACE
         -T${CMAKE_CURRENT_LIST_DIR}/region_alias_test.ld # memory mapping for the ram
         -T${CMAKE_CURRENT_LIST_DIR}/../section_mapping.ld # default section placement
 )
-set_property(TARGET linkage_test PROPERTY LINK_DEPENDS
+set_property(TARGET linkage_test PROPERTY INTERFACE_LINK_DEPENDS
         ${CMAKE_BINARY_DIR}/memory_spec.ld
         ${CMAKE_CURRENT_LIST_DIR}/region_alias_test.ld
         ${CMAKE_CURRENT_LIST_DIR}/../section_mapping.ld
@@ -56,7 +56,7 @@ target_link_options(linkage_application INTERFACE
         -T${CMAKE_CURRENT_LIST_DIR}/region_alias_application.ld # memory mapping for the application
         -T${CMAKE_CURRENT_LIST_DIR}/../section_mapping.ld # default section placement
 )
-set_property(TARGET linkage_application PROPERTY LINK_DEPENDS
+set_property(TARGET linkage_application PROPERTY INTERFACE_LINK_DEPENDS
         ${CMAKE_BINARY_DIR}/memory_spec.ld
         ${CMAKE_CURRENT_LIST_DIR}/region_alias_application.ld
         ${CMAKE_CURRENT_LIST_DIR}/../section_mapping.ld

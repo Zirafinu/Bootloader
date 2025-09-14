@@ -20,12 +20,11 @@ set(updat_size 384*1024)
 set(HOMOGENOUS_PAGED_AREA_INITIALIZER "{0x08000000, 0x08010000, 0, 4}, {0x08010000, 0x08020000, 4, 1}, {0x08020000, 0x08100000,5,12}")
 
 # generate the memory map file and the header
-configure_file(${CMAKE_CURRENT_LIST_DIR}/memory_spec.ld.in ${CMAKE_BINARY_DIR}/memory_spec.ld)
-configure_file(${CMAKE_CURRENT_LIST_DIR}/flash_layout.h.in ${CMAKE_BINARY_DIR}/flash_layout.h)
+configure_file(${CMAKE_CURRENT_LIST_DIR}/in.memory_spec.ld ${CMAKE_BINARY_DIR}/memory_spec.ld)
+configure_file(${CMAKE_CURRENT_LIST_DIR}/in.flash_layout.h ${CMAKE_BINARY_DIR}/flash_layout.h)
 
 # create the library for easy access
 if(NOT TARGET flash_layout)
     add_library(flash_layout INTERFACE)
     target_include_directories(flash_layout INTERFACE ${CMAKE_BINARY_DIR})
 endif()
-
