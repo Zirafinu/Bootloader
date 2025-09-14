@@ -14,4 +14,9 @@ execute_process(COMMAND
     --command "arm semihosting enable ; resume"
     RESULT_VARIABLE test_result
 )
-cmake_language(EXIT ${test_result})
+
+if(test_result EQUAL "0")
+    message(VERBOSE "Test passed")
+else()
+    message(FATAL_ERROR "EXIT code : ${test_result} in binary '${CMAKE_ARGV3}'")
+endif()
