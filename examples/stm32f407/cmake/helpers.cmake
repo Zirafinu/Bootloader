@@ -40,6 +40,15 @@ macro (update_build_time_and_crc target)
     )
 endmacro ()
 
+function(join_bootloader_with_application bootloader_srec application_srec)
+    add_custom_command(
+        OUTPUT "$<PATH:REPLACE_EXTENSION,LAST_ONLY,${application_srec},.combined.srec>"
+        COMMAND sh ARGS -c '\(head --lines=-1 $<OUTPUT_CONFIG:${bootloader_srec}> \; tail --lines=+2 $<OUTPUT_CONFIG:${application_srec}> | head --lines=-1 \; tail --lines=1 $<OUTPUT_CONFIG:${bootloader_srec}>\) >"$<PATH:REPLACE_EXTENSION,LAST_ONLY,${application_srec},.combined.srec>"'
+        DEPENDS ${bootloader_srec} ${application_srec}
+    )
+    add_custom_target(combined_${application_srec} ALL DEPENDS "$<PATH:REPLACE_EXTENSION,LAST_ONLY,${application_srec},.combined.srec>")
+endfunction()
+
 function (encrypt_target target)
     get_target_property(out_dir ${target} BINARY_DIR)
     string(RANDOM LENGTH 32 ALPHABET "0123456789ABCDEF" iv)
