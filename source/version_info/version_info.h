@@ -3,8 +3,8 @@
 
 #include <cstdint>
 
-namespace version_info {
-struct version_info {
+namespace version {
+struct info {
     /** the software version */
     uint32_t version;
     /** the compatible hardware */
@@ -12,6 +12,6 @@ struct version_info {
     /** the time stamp of the build */
     uint32_t build_time;
 };
-} // namespace version_info
+} // namespace version
 
 #endif

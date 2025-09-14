@@ -28,4 +28,4 @@ int main() {
 }
 
 extern "C" __attribute__((used)) //
-const version_info::version_info version_info_struct{0x01'01'00001, 0x000000000, 0x000000000};
+const version::info version_info_struct{0x01'01'00001, 0x000000000, 0x000000000};

@@ -17,6 +17,12 @@
 #include <stm32f4xx_ll_rcc.h>
 #include <stm32f4xx_ll_system.h>
 
+extern "C" __attribute__((used)) //
+const version::info version_info_struct{0x01'01'00001, 0x000000000, 0x000000000};
+
+extern "C" __attribute__((used)) //
+const uint8_t secrets[16]{};
+
 extern "C" {
 void initialize_HAL_GetTick() {
     constexpr size_t TIMER_BASE_CLOCK_KHZ = 12000;
@@ -125,9 +131,3 @@ bool copy_update_to_application() noexcept {
 
 void jump_to_application() noexcept { application_entry_function(); }
 } // namespace bootloader
-
-extern "C" __attribute__((used)) //
-const version_info::version_info version_info_struct{0x01'01'00001, 0x000000000, 0x000000000};
-
-extern "C" __attribute__((used)) //
-const crypto::AES::state_t secrets{};
