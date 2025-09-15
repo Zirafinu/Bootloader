@@ -34,7 +34,7 @@ macro (update_build_time_and_crc target)
         COMMAND ${CMAKE_OBJCOPY} ARGS --update-section ".version_info=$<TARGET_FILE:${target}>.version_info_struct" $<TARGET_FILE:${target}>
         # update the crc
         COMMAND ${CMAKE_OBJCOPY} ARGS --gap-fill 0xFF -O binary $<TARGET_FILE:${target}> $<TARGET_FILE:${target}>.bin
-        COMMAND sh ARGS -c 'head --bytes=-4 $<TARGET_FILE:${target}> | gzip | tail --bytes=4 >$<TARGET_FILE:${target}>.crc'
+        COMMAND sh ARGS -c 'head --bytes=-4 $<TARGET_FILE:${target}> | gzip | tail --bytes=8 | head --bytes=4 >$<TARGET_FILE:${target}>.crc'
         COMMAND ${CMAKE_OBJCOPY} ARGS --update-section ".crc=$<TARGET_FILE:${target}>.crc" $<TARGET_FILE:${target}>
         COMMAND rm ARGS $<TARGET_FILE:${target}>.crc $<TARGET_FILE:${target}>.bin $<TARGET_FILE:${target}>.version_info_struct
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_BINARY_DIR}
