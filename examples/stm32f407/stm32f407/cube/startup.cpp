@@ -37,17 +37,18 @@ extern size_t fast_data_load_start;
 extern size_t fast_data_load_size;
 
 __attribute__((used)) void init_mem() noexcept {
+    // configure 16MHz / 8 * 96 / 2 = 96 MHz
     LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSI, LL_RCC_PLLM_DIV_8, 96, LL_RCC_PLLP_DIV_2);
     LL_RCC_PLL_Enable();
     LL_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
     LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_16);
     LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_16);
-    LL_FLASH_SetLatency(LL_FLASH_LATENCY_3);
+    LL_FLASH_SetLatency(LL_FLASH_LATENCY_4);
 
     /* Wait till PLL is ready */
     while (LL_RCC_PLL_IsReady() != 1) {
     }
-    while (LL_FLASH_GetLatency() != LL_FLASH_LATENCY_3) {
+    while (LL_FLASH_GetLatency() != LL_FLASH_LATENCY_4) {
     }
     LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
 
@@ -98,4 +99,10 @@ __attribute__((used)) void terminate_program(int rc) noexcept {
     for (;;) {
     }
 }
+
+void NMI_Handler() { __BKPT(0); }
+void Hard_fault_Handler() { __BKPT(0); }
+void Memeory_managment_fault_Handler() { __BKPT(0); }
+void Bus_fault_Handler() { __BKPT(0); }
+void Usage_fault_Handler() { __BKPT(0); }
 }

@@ -21,6 +21,14 @@
       }
     },
     {
+      "name": "Debug",
+      "inherits": "default",
+      "toolchainFile": "toolchains/target/toolchain_target.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
       "name": "test_in_qemu",
       "inherits": "default",
       "toolchainFile": "toolchains/qemu/toolchain_qemu.cmake",
@@ -33,6 +41,10 @@
     {
       "name": "Release",
       "configurePreset": "Release"
+    },
+    {
+      "name": "Debug",
+      "configurePreset": "Debug"
     },
     {
       "name": "test_in_qemu",
@@ -70,6 +82,19 @@
         {
           "type": "test",
           "name": "Release"
+        }
+      ]
+    },
+    {
+      "name": "Debug",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Debug"
+        },
+        {
+          "type": "build",
+          "name": "Debug"
         }
       ]
     },
