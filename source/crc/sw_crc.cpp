@@ -7,6 +7,7 @@ static constexpr uint32_t crc32_gzip_tab[16] = {
     0x350C9B64, 0x31CD86D3, 0x3C8EA00A, 0x384FBDBD, //
 };
 
+[[gnu::optimize(3), gnu::hot]]
 static uint32_t reverse(uint32_t value) {
     constexpr uint32_t mask[5] = {0xFFffUL, 0xFF00ffUL, 0xF0F0f0fUL, 0x33333333UL, 0x55555555UL};
     constexpr std::size_t shifts[5] = {16, 8, 4, 2, 1};
