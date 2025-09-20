@@ -15,7 +15,7 @@
 #include <stm32h7xx_hal_flash_ex.h>
 
 extern "C" __attribute__((used)) //
-const version::info version_info_struct{0x01'01'00001, 0x000000000, 0x000000000};
+const version::info version_info_struct{0x01'01'00001, 0x000000001, 0x000000000};
 
 extern "C" __attribute__((used)) //
 const uint8_t secrets[16]{};

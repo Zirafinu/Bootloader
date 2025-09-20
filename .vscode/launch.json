@@ -41,23 +41,18 @@
       "type": "cortex-debug",
       "request": "launch",
       "cwd": "${workspaceRoot}",
-      "executable": "${workspaceFolder}/examples/build/Debug_H743/stm32h743/stm32h743_bootloader.elf",
-      "loadFiles": [
-        "${workspaceFolder}/examples/build/Debug_H743/stm32h743/stm32h743_bootloader.elf",
-        "${workspaceFolder}/examples/build/Debug_H743/stm32h743/blinky.elf"
-      ],
+      "executable": "examples/build/Debug_H743/stm32h743/blinky.combined.srec",
+      "loadFiles": ["examples/build/Debug_H743/stm32h743/blinky.combined.srec"],
       "symbolFiles": [
-        "${workspaceFolder}/examples/build/Debug_H743/stm32h743/stm32h743_bootloader.elf",
-        "${workspaceFolder}/examples/build/Debug_H743/stm32h743/blinky.elf"
+        "examples/build/Debug_H743/stm32h743/stm32h743_bootloader.elf",
+        "examples/build/Debug_H743/stm32h743/blinky.elf"
       ],
       "toolchainPrefix": "arm-none-eabi",
       "gdbPath": "gdb-multiarch",
       "servertype": "openocd",
-      "configFiles": [
-        "${workspaceFolder}/examples/stm32h743/toolchain/board.cfg"
-      ],
-      "device": "STM32H743ZI6U",
-      "svdFile": "${workspaceFolder}/examples/stm32h743/STM32H743.svd",
+      "configFiles": ["examples/stm32h743/toolchain/board.cfg"],
+      "device": "STM32H743",
+      "svdFile": "examples/stm32h743/STM32H743.svd",
       "runToEntryPoint": "main",
       "showDevDebugOutput": "none"
     }

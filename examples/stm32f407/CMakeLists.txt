@@ -23,6 +23,7 @@ update_build_time_and_crc(stm32f407_bootloader)
 add_custom_command(
     OUTPUT stm32f407_bootloader.srec
     COMMAND ${CMAKE_OBJCOPY} ARGS --srec-len=255 -O srec $<TARGET_FILE:stm32f407_bootloader> stm32f407_bootloader.srec
+    DEPENDS stm34f407_bootloader
 )
 
 
@@ -35,6 +36,7 @@ update_build_time_and_crc(blinky)
 add_custom_command(
     OUTPUT blinky.srec
     COMMAND ${CMAKE_OBJCOPY} ARGS --srec-len=255 -O srec $<TARGET_FILE:blinky> blinky.srec
+    DEPENDS blinky
 )
 
 encrypt_target(blinky)
