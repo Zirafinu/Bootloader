@@ -39,40 +39,6 @@ set(CMAKE_EXECUTABLE_SUFFIX_ASM ".elf")
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 #---------------------------------------------------------------------------------------
-# Set compiler/linker flags
-#---------------------------------------------------------------------------------------
-
-# CPU Flags
-# -mcpu=cortex-m4   generate m4 code
-# -mfpu=fpv4-sp-d16 fpu
-# -mfloat-abi=hard  float abi
-# -mthumb           Generat thumb instructions.
-# -mabi=aapcs       Defines enums to be a variable sized type.
-set(CPU_GEN_FLAGS "-mcpu=cortex-m4 -mthumb -mabi=aapcs -mfpu=fpv4-sp-d16 -mfloat-abi=hard ${ADDITIONAL_COMPILE_AND_LINK_FLAGS}")
-
-# Warning Flags
-# -Wall -Wextra -Wpedantic  Print all warnings
-# -Werror                   Treat all warnings as errors
-set(WARNING_FLAGS "-Wall -Wextra -Wpedantic -Werror")
-
-# Object build options
-# -fno-builtin              Do not use built-in functions provided by GCC.
-# -ffunction-sections       Place each function item into its own section in the output file.
-# -fdata-sections           Place each data item into its own section in the output file.
-# -fomit-frame-pointer      Omit the frame pointer in functions that don’t need one.
-set(OBJECT_GEN_FLAGS "${CPU_GEN_FLAGS} ${WARNING_FLAGS} -fno-builtin -ffunction-sections -fdata-sections -fomit-frame-pointer")
-
-set(CMAKE_C_FLAGS_INIT   "${OBJECT_GEN_FLAGS} " CACHE INTERNAL "C Compiler options")
-set(CMAKE_CXX_FLAGS_INIT "${OBJECT_GEN_FLAGS} -fno-threadsafe-statics " CACHE INTERNAL "C++ Compiler options")
-set(CMAKE_ASM_FLAGS_INIT "${OBJECT_GEN_FLAGS} -x assembler-with-cpp  -MMD -MP " CACHE INTERNAL "ASM Compiler options")
-
-
-# -Wl,--gc-sections     Perform the dead code elimination.
-# --specs=nano.specs    Link with newlib-nano.
-# --specs=nosys.specs   No syscalls, provide empty implementations for the POSIX system calls.
-set(CMAKE_EXE_LINKER_FLAGS_INIT " -Wl,--gc-sections ${ADDITIONAL_EXEC_LINKER_FLAGS}" CACHE INTERNAL "Linker options")
-
-#---------------------------------------------------------------------------------------
 # Set debug/release build configuration Options
 #---------------------------------------------------------------------------------------
 

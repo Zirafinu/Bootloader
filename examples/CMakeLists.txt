@@ -11,8 +11,8 @@ enable_testing()
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../source ${CMAKE_CURRENT_BINARY_DIR}/bootloader)
 
-if(TARGET_CORE STREQUAL "Device")
-    add_subdirectory(stm32f407)
+if(TARGET_CORE)
+    add_subdirectory(${TARGET_CORE})
 endif()
 
 _get_all_cmake_targets(all_targets ${CMAKE_CURRENT_LIST_DIR})

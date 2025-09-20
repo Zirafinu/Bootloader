@@ -15,7 +15,7 @@
     {
       "name": "Release",
       "inherits": "default",
-      "toolchainFile": "toolchains/target/toolchain_target.cmake",
+      "toolchainFile": "stm32f407/toolchain/toolchain.cmake",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
@@ -23,7 +23,7 @@
     {
       "name": "Debug",
       "inherits": "default",
-      "toolchainFile": "toolchains/target/toolchain_target.cmake",
+      "toolchainFile": "stm32f407/toolchain/toolchain.cmake",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
@@ -31,7 +31,7 @@
     {
       "name": "test_in_qemu",
       "inherits": "default",
-      "toolchainFile": "toolchains/qemu/toolchain_qemu.cmake",
+      "toolchainFile": "qemu/toolchain/toolchain.cmake",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
