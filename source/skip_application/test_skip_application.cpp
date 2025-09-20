@@ -1,5 +1,5 @@
+#include <bootloader/skip_application.h>
 #include <cstdint>
-#include <skip_application.h>
 
 extern "C" {
 uint32_t application_skip_request = 0;

@@ -1,4 +1,4 @@
-#include "skip_application.h"
+#include "bootloader/skip_application.h"
 #include <cstdint>
 namespace {
 constexpr uint32_t application_skip_request_true = 0xC1AE'E345UL;

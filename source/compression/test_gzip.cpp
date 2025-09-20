@@ -1,4 +1,4 @@
-#include "gzip.h"
+#include "bootloader/gzip.h"
 #include <cstring>
 
 namespace {

@@ -13,7 +13,7 @@
       "binaryDir": "${sourceDir}/build/${presetName}"
     },
     {
-      "name": "Release",
+      "name": "Release_F407",
       "inherits": "default",
       "toolchainFile": "stm32f407/toolchain/toolchain.cmake",
       "cacheVariables": {
@@ -21,7 +21,7 @@
       }
     },
     {
-      "name": "Debug",
+      "name": "Debug_F407",
       "inherits": "default",
       "toolchainFile": "stm32f407/toolchain/toolchain.cmake",
       "cacheVariables": {
@@ -39,8 +39,12 @@
   ],
   "buildPresets": [
     {
-      "name": "Release",
-      "configurePreset": "Release"
+      "name": "Release_F407",
+      "configurePreset": "Release_F407"
+    },
+    {
+      "name": "Debug_F407",
+      "configurePreset": "Debug_F407"
     },
     {
       "name": "Debug",
@@ -53,8 +57,8 @@
   ],
   "testPresets": [
     {
-      "name": "Release",
-      "configurePreset": "Release",
+      "name": "Release_F407",
+      "configurePreset": "Release_F407",
       "output": {
         "outputOnFailure": true
       }
@@ -69,32 +73,32 @@
   ],
   "workflowPresets": [
     {
-      "name": "Release",
+      "name": "Release_F407",
       "steps": [
         {
           "type": "configure",
-          "name": "Release"
+          "name": "Release_F407"
         },
         {
           "type": "build",
-          "name": "Release"
+          "name": "Release_F407"
         },
         {
           "type": "test",
-          "name": "Release"
+          "name": "Release_F407"
         }
       ]
     },
     {
-      "name": "Debug",
+      "name": "Debug_F407",
       "steps": [
         {
           "type": "configure",
-          "name": "Debug"
+          "name": "Debug_F407"
         },
         {
           "type": "build",
-          "name": "Debug"
+          "name": "Debug_F407"
         }
       ]
     },

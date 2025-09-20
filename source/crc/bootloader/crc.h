@@ -1,5 +1,5 @@
-#ifndef CRC_CRC_H_
-#define CRC_CRC_H_
+#ifndef BOOTLOADER_CRC_CRC_H_
+#define BOOTLOADER_CRC_CRC_H_
 
 #include <cstdint>
 

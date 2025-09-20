@@ -1,5 +1,5 @@
-#include "gzip.h"
-#include <crc.h>
+#include "bootloader/gzip.h"
+#include <bootloader/crc.h>
 
 #include <algorithm>
 #include <cstddef>

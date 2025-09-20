@@ -1,8 +1,8 @@
-#ifndef BOOTLOADER_H_
-#define BOOTLOADER_H_
+#ifndef BOOTLOADER_BOOTLOADER_H_
+#define BOOTLOADER_BOOTLOADER_H_
 
+#include <bootloader/skip_application.h>
 #include <cstdint>
-#include <skip_application.h>
 
 namespace bootloader {
 [[noreturn]]

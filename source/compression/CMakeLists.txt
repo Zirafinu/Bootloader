@@ -1,6 +1,7 @@
 add_library(bootloader_gzip INTERFACE)
 target_sources(bootloader_gzip INTERFACE gzip.cpp)
 target_include_directories(bootloader_gzip INTERFACE ${CMAKE_CURRENT_LIST_DIR})
+target_link_libraries(bootloader_gzip INTERFACE Bootloader::crc)
 add_library(Bootloader::gzip ALIAS bootloader_gzip)
 
 if(BUILD_TESTING)

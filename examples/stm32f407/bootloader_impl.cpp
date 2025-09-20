@@ -4,11 +4,11 @@
 #include <cstdint>
 #include <cstring>
 
-#include <crc.h>
-#include <crypto.h>
+#include <bootloader/crc.h>
+#include <bootloader/crypto.h>
+#include <bootloader/gzip.h>
+#include <bootloader/version_info.h>
 #include <flash_layout.h>
-#include <gzip.h>
-#include <version_info.h>
 
 #include <stm32f4xx_hal.h>
 #include <stm32f4xx_hal_flash.h>

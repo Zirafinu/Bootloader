@@ -1,6 +1,6 @@
 #include <cstdint>
 
-#include <version_info.h>
+#include <bootloader/version_info.h>
 
 #include <stm32f407xx.h>
 

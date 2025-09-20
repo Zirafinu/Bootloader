@@ -1,5 +1,5 @@
-#ifndef COMPRESSION_GZIP_H
-#define COMPRESSION_GZIP_H
+#ifndef BOOTLOADER_COMPRESSION_GZIP_H
+#define BOOTLOADER_COMPRESSION_GZIP_H
 
 #include <array>
 #include <cstdint>

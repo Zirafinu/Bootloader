@@ -1,5 +1,5 @@
 #include <array>
-#include <crc.h>
+#include <bootloader/crc.h>
 
 int main(int, char **) {
     const char message1[] = "\x00\x28\x00\x10\x1d\x80\x00\x08";

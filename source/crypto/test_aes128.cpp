@@ -1,5 +1,5 @@
 #include <array>
-#include <crypto.h>
+#include <bootloader/crypto.h>
 
 int main(int, char **) {
     const uint8_t initial_key[16] = "0123456789ABCDE";

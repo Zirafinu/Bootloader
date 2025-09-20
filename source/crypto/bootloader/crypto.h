@@ -1,5 +1,5 @@
-#ifndef CRYPTO_CRYPTO_H
-#define CRYPTO_CRYPTO_H
+#ifndef BOOTLOADER_CRYPTO_CRYPTO_H
+#define BOOTLOADER_CRYPTO_CRYPTO_H
 
 #include "aes.h"
 #include <functional>

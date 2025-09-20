@@ -1,4 +1,4 @@
-#include "crc.h"
+#include "bootloader/crc.h"
 
 static constexpr uint32_t crc32_gzip_tab[16] = {
     0x00000000, 0x04C11DB7, 0x09823B6E, 0x0D4326D9, //
