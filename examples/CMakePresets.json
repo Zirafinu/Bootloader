@@ -29,6 +29,14 @@
       }
     },
     {
+      "name": "Debug_H743",
+      "inherits": "default",
+      "toolchainFile": "stm32h743/toolchain/toolchain.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
       "name": "test_in_qemu",
       "inherits": "default",
       "toolchainFile": "qemu/toolchain/toolchain.cmake",
@@ -47,8 +55,8 @@
       "configurePreset": "Debug_F407"
     },
     {
-      "name": "Debug",
-      "configurePreset": "Debug"
+      "name": "Debug_H743",
+      "configurePreset": "Debug_H743"
     },
     {
       "name": "test_in_qemu",
@@ -99,6 +107,19 @@
         {
           "type": "build",
           "name": "Debug_F407"
+        }
+      ]
+    },
+    {
+      "name": "Debug_H743",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Debug_H743"
+        },
+        {
+          "type": "build",
+          "name": "Debug_H743"
         }
       ]
     },

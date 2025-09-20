@@ -14,18 +14,18 @@
       "initCommands": ["break main"]
     },
     {
-      "name": "Debug with OpenOCD",
+      "name": "Debug_F407",
       "type": "cortex-debug",
       "request": "launch",
       "cwd": "${workspaceRoot}",
-      "executable": "${workspaceFolder}/examples/build/Debug/stm32f407/stm32f407_bootloader.elf",
+      "executable": "${workspaceFolder}/examples/build/Debug_F407/stm32f407/stm32f407_bootloader.elf",
       "loadFiles": [
-        "${workspaceFolder}/examples/build/Debug/stm32f407/stm32f407_bootloader.elf",
-        "${workspaceFolder}/examples/build/Debug/stm32f407/blinky.elf"
+        "${workspaceFolder}/examples/build/Debug_F407/stm32f407/stm32f407_bootloader.elf",
+        "${workspaceFolder}/examples/build/Debug_F407/stm32f407/blinky.elf"
       ],
       "symbolFiles": [
-        "${workspaceFolder}/examples/build/Debug/stm32f407/stm32f407_bootloader.elf",
-        "${workspaceFolder}/examples/build/Debug/stm32f407/blinky.elf"
+        "${workspaceFolder}/examples/build/Debug_F407/stm32f407/stm32f407_bootloader.elf",
+        "${workspaceFolder}/examples/build/Debug_F407/stm32f407/blinky.elf"
       ],
       "toolchainPrefix": "arm-none-eabi",
       "gdbPath": "gdb-multiarch",
@@ -33,6 +33,31 @@
       "configFiles": ["board/stm32f4discovery.cfg"],
       "device": "STM32F407VG6",
       "svdFile": "${workspaceFolder}/examples/stm32f407/STM32F407.svd",
+      "runToEntryPoint": "main",
+      "showDevDebugOutput": "none"
+    },
+    {
+      "name": "Debug_H743",
+      "type": "cortex-debug",
+      "request": "launch",
+      "cwd": "${workspaceRoot}",
+      "executable": "${workspaceFolder}/examples/build/Debug_H743/stm32h743/stm32h743_bootloader.elf",
+      "loadFiles": [
+        "${workspaceFolder}/examples/build/Debug_H743/stm32h743/stm32h743_bootloader.elf",
+        "${workspaceFolder}/examples/build/Debug_H743/stm32h743/blinky.elf"
+      ],
+      "symbolFiles": [
+        "${workspaceFolder}/examples/build/Debug_H743/stm32h743/stm32h743_bootloader.elf",
+        "${workspaceFolder}/examples/build/Debug_H743/stm32h743/blinky.elf"
+      ],
+      "toolchainPrefix": "arm-none-eabi",
+      "gdbPath": "gdb-multiarch",
+      "servertype": "openocd",
+      "configFiles": [
+        "${workspaceFolder}/examples/stm32h743/toolchain/board.cfg"
+      ],
+      "device": "STM32H743ZI6U",
+      "svdFile": "${workspaceFolder}/examples/stm32h743/STM32H743.svd",
       "runToEntryPoint": "main",
       "showDevDebugOutput": "none"
     }
