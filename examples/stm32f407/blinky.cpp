@@ -19,8 +19,10 @@ int main() {
         GPIOD->BSRR = (on_set | off_set) << 12;
 
         // might be enough delay to see them blink
-        for (int i = 0; i < 1000; ++i) {
-            __NOP();
+        for (int i = 0; i < (96000 / 4); ++i) {
+            for (int j = 0; j < 50; ++j) {
+                __NOP();
+            }
         }
     }
 
