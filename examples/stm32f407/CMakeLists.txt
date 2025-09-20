@@ -1,28 +1,41 @@
-cmake_minimum_required(VERSION 3.28)
-project(micro_bootloader_stm32f407_example CXX C ASM)
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-include(cmake/helpers.cmake)
+add_subdirectory(cube)
 
-include(CTest)
-enable_testing()
+target_link_libraries(linkage_bootloader INTERFACE cube)
+target_link_libraries(linkage_test INTERFACE cube)
+target_link_libraries(linkage_application INTERFACE cube)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../source ${CMAKE_CURRENT_BINARY_DIR}/bootloader)
+add_executable(stm32f407_bootloader bootloader_impl.cpp)
+target_link_libraries(stm32f407_bootloader PRIVATE
+    linkage_bootloader
+    flash_layout
+    Bootloader::core
+    Bootloader::skip_application_impl
+    Bootloader::crc_impl
+    Bootloader::gzip
+    Bootloader::version_info
+    Bootloader::crypto_impl
+)
+add_custom_command(TARGET stm32f407_bootloader
+    COMMAND ${CMAKE_OBJCOPY}  ARGS --update-section ".secrets=${CMAKE_CURRENT_LIST_DIR}/../key.bin" $<TARGET_FILE:stm32f407_bootloader>
+)
+update_build_time_and_crc(stm32f407_bootloader)
+add_custom_command(
+    OUTPUT stm32f407_bootloader.srec
+    COMMAND ${CMAKE_OBJCOPY} ARGS --srec-len=255 -O srec $<TARGET_FILE:stm32f407_bootloader> stm32f407_bootloader.srec
+)
 
-if(TARGET_CORE STREQUAL "Device")
-    add_subdirectory(stm32f407)
-endif()
 
-_get_all_cmake_targets(all_targets ${CMAKE_CURRENT_LIST_DIR})
-foreach (target ${all_targets})
-    get_target_property(target_type ${target} TYPE)
-    if (${target_type} MATCHES "EXECUTABLE")
-        target_link_options(${target} PRIVATE -Wl,-Map=$<TARGET_FILE:${target}>.map)
-        set_target_properties(${target} PROPERTIES ADDITIONAL_CLEAN_FILES $<TARGET_FILE_BASE_NAME:${target}>.map)
-        if((${target} MATCHES "test_.*") AND (TARGET linkage_test))
-            target_link_libraries(${target} PRIVATE linkage_test)
-        endif()
-    endif ()
-endforeach ()
+add_executable(blinky blinky.cpp)
+target_link_libraries(blinky PRIVATE
+    linkage_application
+    Bootloader::version_info
+)
+update_build_time_and_crc(blinky)
+add_custom_command(
+    OUTPUT blinky.srec
+    COMMAND ${CMAKE_OBJCOPY} ARGS --srec-len=255 -O srec $<TARGET_FILE:blinky> blinky.srec
+)
+
+encrypt_target(blinky)
+join_bootloader_with_application(stm32f407_bootloader.srec blinky.srec)
