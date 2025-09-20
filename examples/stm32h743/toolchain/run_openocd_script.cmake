@@ -1,7 +1,7 @@
 # test driver for on target tests
 execute_process(COMMAND
     openocd
-    --file board.cfg
+    --file ${CMAKE_CURRENT_LIST_DIR}/board.cfg
     --command "init ; halt ; reset halt"
 # flash the test binary
     --command "load_image ${CMAKE_ARGV3}"

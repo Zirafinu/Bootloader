@@ -37,6 +37,14 @@
       }
     },
     {
+      "name": "Release_H743",
+      "inherits": "default",
+      "toolchainFile": "stm32h743/toolchain/toolchain.cmake",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
       "name": "test_in_qemu",
       "inherits": "default",
       "toolchainFile": "qemu/toolchain/toolchain.cmake",
@@ -59,6 +67,10 @@
       "configurePreset": "Debug_H743"
     },
     {
+      "name": "Release_H743",
+      "configurePreset": "Release_H743"
+    },
+    {
       "name": "test_in_qemu",
       "configurePreset": "test_in_qemu"
     }
@@ -67,6 +79,13 @@
     {
       "name": "Release_F407",
       "configurePreset": "Release_F407",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "Release_H743",
+      "configurePreset": "Release_H743",
       "output": {
         "outputOnFailure": true
       }
@@ -107,6 +126,23 @@
         {
           "type": "build",
           "name": "Debug_F407"
+        }
+      ]
+    },
+    {
+      "name": "Release_H743",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "Release_H743"
+        },
+        {
+          "type": "build",
+          "name": "Release_H743"
+        },
+        {
+          "type": "test",
+          "name": "Release_H743"
         }
       ]
     },
