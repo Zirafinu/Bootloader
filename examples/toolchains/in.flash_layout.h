@@ -37,6 +37,26 @@ static_assert(${total_size} == ${bootl_size} + ${appli_size} + ${updat_size} + $
                                    ${recrs_size},
               "flash size mismatch");
 
+constexpr bool start_address_has_matching_end_address(size_t start_address) {
+    size_t end_addresses[] = {bootloader_end, application_end, update_end,
+                              param_end,      event_log_end,   resources_end};
+
+    if (start_address == total_begin)
+        return true;
+
+    for (const auto &end_address : end_addresses) {
+        if (end_address == start_address)
+            return true;
+    }
+    return false;
+}
+static_assert(start_address_has_matching_end_address(bootloader_begin));
+static_assert(start_address_has_matching_end_address(application_begin));
+static_assert(start_address_has_matching_end_address(update_begin));
+static_assert(start_address_has_matching_end_address(param_begin));
+static_assert(start_address_has_matching_end_address(event_log_begin));
+static_assert(start_address_has_matching_end_address(resources_begin));
+
 struct Homogenous_Paged_Area {
     size_t begin;
     size_t bound;
@@ -50,7 +70,8 @@ struct Homogenous_Paged_Area {
     constexpr bool can_enumerate_page_of(size_t address) const {
         return begin <= address && address <= bound;
     }
-    constexpr bool page_starts_at(size_t address) const { return ((address - begin) % page_count) == 0; }
+    constexpr size_t page_size() const { return (bound - begin) / page_count; }
+    constexpr bool page_starts_at(size_t address) const { return ((address - begin) % page_size()) == 0; }
 };
 
 constexpr Homogenous_Paged_Area flash_areas[] = {${HOMOGENOUS_PAGED_AREA_INITIALIZER}};

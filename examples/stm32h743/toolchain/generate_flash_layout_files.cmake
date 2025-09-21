@@ -3,11 +3,11 @@
 #---------------------------------------------------------------------------------------
 set(total_begin 0x08000000)
 set(bootl_begin 0x08000000)
-set(param_begin 0x08002000)
-set(event_begin 0x08004000)
-set(recrs_begin 0x08006000)
-set(appli_begin 0x08008000)
-set(updat_begin 0x08080000)
+set(param_begin 0x08020000)
+set(event_begin 0x08040000)
+set(recrs_begin 0x08060000)
+set(appli_begin 0x08080000)
+set(updat_begin 0x08180000)
 
 set(total_size 2*1024*1024)
 set(bootl_size 128*1024)
