@@ -1,5 +1,7 @@
 #include "bootloader/crc.h"
 
+namespace crc {
+
 static constexpr uint32_t crc32_gzip_tab[16] = {
     0x00000000, 0x04C11DB7, 0x09823B6E, 0x0D4326D9, //
     0x130476DC, 0x17C56B6B, 0x1A864DB2, 0x1E475005, //
@@ -8,7 +10,7 @@ static constexpr uint32_t crc32_gzip_tab[16] = {
 };
 
 [[gnu::optimize(3), gnu::hot]]
-static uint32_t reverse(uint32_t value) {
+static inline uint32_t reverse(uint32_t value) {
     constexpr uint32_t mask[5] = {0xFFffUL, 0xFF00ffUL, 0xF0F0f0fUL, 0x33333333UL, 0x55555555UL};
     constexpr std::size_t shifts[5] = {16, 8, 4, 2, 1};
     for (std::size_t i = 0; i < 5; ++i) {
@@ -17,7 +19,6 @@ static uint32_t reverse(uint32_t value) {
     return value;
 }
 
-namespace crc {
 uint32_t compute(const void *mem_begin, const void *mem_end) noexcept {
     const uint8_t *p = reinterpret_cast<const uint8_t *>(mem_begin);
     uint32_t crc = ~0U;
