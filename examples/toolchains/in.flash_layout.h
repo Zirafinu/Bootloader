@@ -65,7 +65,7 @@ struct Homogenous_Paged_Area {
 
     constexpr bool contains(size_t address) const { return begin <= address && address < bound; }
     constexpr size_t page_of(size_t address) const {
-        return ((address - begin) / page_count) + first_page_index;
+        return ((address - begin) / page_size()) + first_page_index;
     }
     constexpr bool can_enumerate_page_of(size_t address) const {
         return begin <= address && address <= bound;

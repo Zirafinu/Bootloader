@@ -49,16 +49,51 @@ class Flash_Lock {
     ~Flash_Lock() { HAL_FLASH_Lock(); }
 };
 
+consteval size_t effected_Flash_Banks(size_t begin, size_t end) {
+    if (FLASH_BANK1_BASE <= begin && begin <= FLASH_BANK2_BASE && FLASH_BANK1_BASE <= end &&
+        end <= FLASH_BANK2_BASE) {
+        return FLASH_BANK_1;
+    }
+    if (FLASH_BANK2_BASE <= begin && FLASH_BANK2_BASE <= end) {
+        return FLASH_BANK_2;
+    }
+    return FLASH_BANK_BOTH;
+}
+
 bool erase_application() noexcept {
+    constexpr size_t banks =
+        effected_Flash_Banks(flash_layout::application_begin, flash_layout::application_end);
     FLASH_EraseInitTypeDef EraseInit;
+    uint32_t SectorError = 0;
+    if (banks == FLASH_BANK_BOTH) {
+        constexpr size_t sectors_in_first_bank = FLASH_SECTOR_TOTAL - flash_layout::application_begin_page;
+
+        EraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
+        EraseInit.Banks = FLASH_BANK_1;
+        EraseInit.Sector = flash_layout::application_begin_page;
+        EraseInit.NbSectors = sectors_in_first_bank;
+        EraseInit.VoltageRange = FLASH_VOLTAGE_RANGE_3;
+        if (HAL_OK != HAL_FLASHEx_Erase(&EraseInit, &SectorError))
+            return false;
+
+        EraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
+        EraseInit.Banks = FLASH_BANK_2;
+        EraseInit.Sector = 0;
+        EraseInit.NbSectors = flash_layout::application_end_page - (sectors_in_first_bank);
+        EraseInit.VoltageRange = FLASH_VOLTAGE_RANGE_3;
+        if (HAL_OK != HAL_FLASHEx_Erase(&EraseInit, &SectorError))
+            return false;
+    } else {
     EraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
-    EraseInit.Banks = 0xFFffFFff;
+        EraseInit.Banks = banks;
     EraseInit.Sector = flash_layout::application_begin_page;
     EraseInit.NbSectors = flash_layout::application_end_page - flash_layout::application_begin_page;
     EraseInit.VoltageRange = FLASH_VOLTAGE_RANGE_3;
 
-    uint32_t SectorError = 0;
-    return HAL_OK == HAL_FLASHEx_Erase(&EraseInit, &SectorError);
+        if (HAL_OK != HAL_FLASHEx_Erase(&EraseInit, &SectorError))
+            return false;
+    }
+    return true;
 }
 } // namespace
 
@@ -98,6 +133,7 @@ bool flush_write_buffer() {
     write_application_buffer_used = 0;
     return true;
 }
+
 void write_application(uint8_t value) {
     write_application_buffer[write_application_buffer_used] = value;
     ++write_application_buffer_used;
@@ -105,6 +141,7 @@ void write_application(uint8_t value) {
         flush_write_buffer();
     }
 }
+
 uint8_t read_application(std::size_t distance) {
     if (distance > write_application_buffer_used) {
         return *(write_application_it - (distance - write_application_buffer_used));
@@ -145,8 +182,8 @@ bool application_update_is_valid(bool is_application_memory_valid) noexcept {
     if (is_application_memory_valid) {
         const version::info *application_version_info = reinterpret_cast<version::info const *>(
             flash_layout::application_end - 4 - sizeof(version::info));
-        if (update_version_info->version >= application_version_info->version ||
-            application_version_info->version == 0xFFffFFffU)
+        if (update_version_info->version < application_version_info->version &&
+            application_version_info->version != 0xFFffFFffU)
             return false;
     }
 
