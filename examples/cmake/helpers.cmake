@@ -1,3 +1,7 @@
+if(NOT DEFINED BOOTLOADER_HELPER_SCRIPT_DIR)
+    set(BOOTLOADER_HELPER_SCRIPT_DIR "${CMAKE_CURRENT_LIST_DIR}")
+endif()
+
 function (_get_all_cmake_targets out_var current_dir)
     get_property(targets DIRECTORY ${current_dir} PROPERTY BUILDSYSTEM_TARGETS)
     get_property(subdirs DIRECTORY ${current_dir} PROPERTY SUBDIRECTORIES)
@@ -63,8 +67,8 @@ function (encrypt_target target)
         COMMAND ${CMAKE_OBJCOPY} ARGS --only-section=.version_info -Obinary $<TARGET_FILE:${target}> "${out_dir}/${target}.package"
         # place the key in the bootloader output file!
         COMMAND gzip ARGS -9 -f -n $<TARGET_FILE:${target}>.bin
-        COMMAND openssl ARGS enc -e -kfile ${CMAKE_CURRENT_LIST_DIR}/../key.bin -iv ${iv} -aes-128-cbc -in $<TARGET_FILE:${target}>.bin.gz -out $<TARGET_FILE:${target}>.bin.gz.encrypted
-        COMMAND ${CMAKE_COMMAND} ARGS -E echo_append "${iv}" >>"${out_dir}/${target}.package"
+        COMMAND openssl ARGS enc -e -kfile ${BOOTLOADER_HELPER_SCRIPT_DIR}/../key.bin -iv ${iv} -aes-128-cbc -nosalt -in $<TARGET_FILE:${target}>.bin.gz -out $<TARGET_FILE:${target}>.bin.gz.encrypted
+        COMMAND ${CMAKE_COMMAND} ARGS -E echo_append "${iv}" | xxd -r -ps >>"${out_dir}/${target}.package"
         COMMAND ${CMAKE_COMMAND} ARGS -E cat $<TARGET_FILE:${target}>.bin.gz.encrypted >>"${out_dir}/${target}.package"
         COMMAND ${CMAKE_COMMAND} ARGS -E rm $<TARGET_FILE:${target}>.bin.gz $<TARGET_FILE:${target}>.bin.gz.encrypted
         DEPENDS $<TARGET_FILE:${target}>
