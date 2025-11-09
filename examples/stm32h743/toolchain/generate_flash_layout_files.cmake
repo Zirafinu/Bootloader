@@ -15,7 +15,7 @@ set(param_size 128*1024)
 set(event_size 128*1024)
 set(recrs_size 128*1024)
 set(appli_size 8*128*1024)
-set(updat_size 4*128*1024)
+set(updat_size 4*128*1024 CACHE INTERNAL "the size of the update memory")
 
 set(HOMOGENOUS_PAGED_AREA_INITIALIZER "{0x08000000, 0x08200000, 0, 16}")
 

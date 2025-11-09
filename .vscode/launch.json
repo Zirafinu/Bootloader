@@ -55,6 +55,27 @@
       "svdFile": "examples/stm32h743/STM32H743.svd",
       "runToEntryPoint": "main",
       "showDevDebugOutput": "none"
+    },
+    {
+      "name": "scratch_h743",
+      "type": "cortex-debug",
+      "request": "launch",
+      "cwd": "${workspaceRoot}",
+      "executable": "examples/build/Debug_H743/stm32h743/tests/test_implementation.elf",
+      "loadFiles": [
+        "examples/build/Debug_H743/stm32h743/tests/test_implementation.elf"
+      ],
+      "symbolFiles": [
+        "examples/build/Debug_H743/stm32h743/tests/test_implementation.elf"
+      ],
+      "toolchainPrefix": "arm-none-eabi",
+      "gdbPath": "gdb-multiarch",
+      "servertype": "openocd",
+      "configFiles": ["examples/stm32h743/toolchain/board.cfg"],
+      "device": "STM32H743",
+      "svdFile": "examples/stm32h743/STM32H743.svd",
+      "runToEntryPoint": "main",
+      "showDevDebugOutput": "none"
     }
   ]
 }

@@ -63,6 +63,16 @@ set_property(TARGET linkage_bootloader PROPERTY INTERFACE_LINK_DEPENDS
         ${CMAKE_CURRENT_LIST_DIR}/region_alias_bootloader.ld
         ${CMAKE_CURRENT_LIST_DIR}/../../toolchains/section_mapping.ld
 )
+# --------------------------SEMIHOSTING-----------------------------------------------------------
+add_library(linkage_semihosting INTERFACE)
+target_link_options(linkage_semihosting INTERFACE
+        -specs=nano.specs -Wl,-lc # reduced libc
+        -specs=rdimon.specs -Wl,-lrdimon # enable semihosting
+)
+target_compile_definitions(linkage_semihosting INTERFACE
+        STARTUP_WITH_SEMIHOSTING
+        BOOT_WITH_INIT_ARRAY
+)
 # --------------------------TESTING---------------------------------------------------------------
 add_library(linkage_test INTERFACE)
 target_link_options(linkage_test INTERFACE

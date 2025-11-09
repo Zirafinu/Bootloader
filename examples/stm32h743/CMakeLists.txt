@@ -1,9 +1,12 @@
-
 add_subdirectory(cube)
-
 target_link_libraries(linkage_bootloader INTERFACE cube)
 target_link_libraries(linkage_test INTERFACE cube)
 target_link_libraries(linkage_application INTERFACE cube)
+
+
+if(BUILD_TESTING)
+add_subdirectory(tests)
+endif()
 
 add_executable(stm32h743_bootloader bootloader_impl.cpp)
 target_link_libraries(stm32h743_bootloader PRIVATE
