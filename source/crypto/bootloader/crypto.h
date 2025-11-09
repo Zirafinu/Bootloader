@@ -8,6 +8,57 @@
 namespace crypto {
 
 /**
+ * permits unaligned access to an AES stream
+ */
+template <typename BaseIterator> class bytes_to_state_iterator {
+  public:
+    using base_t = BaseIterator;
+    using block_t = AES::state_t;
+    using this_t = bytes_to_state_iterator;
+
+    /// implementations for compliance with std::input_iterator
+    using iterator_category = std::forward_iterator_tag;
+    using difference_type = std::ptrdiff_t;
+    using value_type = block_t;
+    using pointer = value_type *;
+    using reference = value_type &;
+
+    bytes_to_state_iterator(base_t read_iterator) : read_iterator(read_iterator) {}
+
+    value_type operator*() const {
+        AES::state_t result{0, 0, 0, 0};
+        base_t current_byte = read_iterator;
+        for (size_t i = 0; i < 16; ++i) {
+            result[i / 4] |= static_cast<uint32_t>(*current_byte) << (8 * (i % 4));
+            ++current_byte;
+        }
+        return result;
+    }
+
+    this_t operator++(int) {
+        auto tmp = *this;
+        ++(*this);
+        return tmp;
+    }
+
+    this_t &operator++() {
+        read_iterator += 16;
+        return *this;
+    }
+
+    friend bool operator==(this_t const &lhs, this_t const &rhs) {
+        return lhs.read_iterator == rhs.read_iterator;
+    }
+
+    friend bool operator!=(this_t const &lhs, this_t const &rhs) {
+        return lhs.read_iterator != rhs.read_iterator;
+    }
+
+  private:
+    base_t read_iterator;
+};
+
+/**
  * Implements AES with CBC as a single iterator
  */
 template <typename BaseIterator> class decrypt_iterator {
@@ -29,16 +80,6 @@ template <typename BaseIterator> class decrypt_iterator {
     static decrypt_iterator make_sentinel(base_t input) {
         return decrypt_iterator{input, block_t{}, nullptr};
     }
-
-    decrypt_iterator(const decrypt_iterator &other) = default;
-
-    decrypt_iterator(decrypt_iterator &&other) = default;
-
-    ~decrypt_iterator() = default;
-
-    decrypt_iterator &operator=(const decrypt_iterator &other) = default;
-
-    decrypt_iterator &operator=(decrypt_iterator &&other) = default;
 
     friend bool operator==(decrypt_iterator const &lhs, decrypt_iterator const &rhs) {
         return lhs.read_iterator == rhs.read_iterator;
@@ -95,16 +136,6 @@ template <typename BaseIterator> class read_as_uint8_t {
 
     explicit read_as_uint8_t(base_t input, ssize_t in_element_index = -1)
         : read_iterator{input}, in_element_index{in_element_index} {}
-
-    read_as_uint8_t(const read_as_uint8_t &other) = default;
-
-    read_as_uint8_t(read_as_uint8_t &&other) = default;
-
-    ~read_as_uint8_t() = default;
-
-    read_as_uint8_t &operator=(const read_as_uint8_t &other) = default;
-
-    read_as_uint8_t &operator=(read_as_uint8_t &&other) = default;
 
     value_type operator*() const {
         if (in_element_index < 0) {
