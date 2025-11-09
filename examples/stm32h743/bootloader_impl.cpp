@@ -25,16 +25,22 @@ void initialize_HAL_GetTick() {
     constexpr size_t TIMER_BASE_CLOCK_KHZ = 64000;
     RCC->APB1LENR |= RCC_APB1LENR_TIM2EN;
     (void)RCC->APB1LENR;
+    TIM2->CR1 = 0;
     TIM2->PSC = TIMER_BASE_CLOCK_KHZ - 1; // 1 kHz
     TIM2->ARR = ~0UL;
+    TIM2->CNT = ~0UL;
     TIM2->CR1 = TIM_CR1_CEN;
 }
 uint32_t HAL_GetTick() { return TIM2->CNT; }
 
+void terminate_program(int rc);
 void assert_failed(uint8_t *file, uint32_t line) {
     (void)file;
     (void)line;
-    __BKPT(0);
+#ifdef STARTUP_WITH_SEMIHOSTING
+    printf("Assert_Failed %s:%u", file, unsigned(line));
+#endif
+    terminate_program(134);
 }
 
 // the applications reset handler address
@@ -65,6 +71,8 @@ bool erase_application() noexcept {
         effected_Flash_Banks(flash_layout::application_begin, flash_layout::application_end);
     FLASH_EraseInitTypeDef EraseInit;
     uint32_t SectorError = 0;
+
+    Flash_Lock lock{};
     if (banks == FLASH_BANK_BOTH) {
         constexpr size_t sectors_in_first_bank = FLASH_SECTOR_TOTAL - flash_layout::application_begin_page;
 
@@ -73,25 +81,27 @@ bool erase_application() noexcept {
         EraseInit.Sector = flash_layout::application_begin_page;
         EraseInit.NbSectors = sectors_in_first_bank;
         EraseInit.VoltageRange = FLASH_VOLTAGE_RANGE_3;
-        if (HAL_OK != HAL_FLASHEx_Erase(&EraseInit, &SectorError))
+        if (HAL_OK != HAL_FLASHEx_Erase(&EraseInit, &SectorError)) {
             return false;
+        }
 
         EraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
         EraseInit.Banks = FLASH_BANK_2;
         EraseInit.Sector = 0;
-        EraseInit.NbSectors = flash_layout::application_end_page - (sectors_in_first_bank);
+        EraseInit.NbSectors = flash_layout::application_end_page - FLASH_SECTOR_TOTAL;
         EraseInit.VoltageRange = FLASH_VOLTAGE_RANGE_3;
-        if (HAL_OK != HAL_FLASHEx_Erase(&EraseInit, &SectorError))
+        if (HAL_OK != HAL_FLASHEx_Erase(&EraseInit, &SectorError)) {
             return false;
+        }
     } else {
-    EraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
+        EraseInit.TypeErase = FLASH_TYPEERASE_SECTORS;
         EraseInit.Banks = banks;
-    EraseInit.Sector = flash_layout::application_begin_page;
-    EraseInit.NbSectors = flash_layout::application_end_page - flash_layout::application_begin_page;
-    EraseInit.VoltageRange = FLASH_VOLTAGE_RANGE_3;
-
-        if (HAL_OK != HAL_FLASHEx_Erase(&EraseInit, &SectorError))
+        EraseInit.Sector = flash_layout::application_begin_page;
+        EraseInit.NbSectors = flash_layout::application_end_page - flash_layout::application_begin_page;
+        EraseInit.VoltageRange = FLASH_VOLTAGE_RANGE_3;
+        if (HAL_OK != HAL_FLASHEx_Erase(&EraseInit, &SectorError)) {
             return false;
+        }
     }
     return true;
 }
