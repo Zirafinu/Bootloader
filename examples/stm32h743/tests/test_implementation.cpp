@@ -5,9 +5,11 @@ extern "C" uint32_t *estack;
 
 namespace application {
 
-void Reset_Handler() { terminate_program(4); }
+void application_reset() { terminate_program(4); }
 
-std::array<void *, 2> isr_vector{&estack, reinterpret_cast<void *>(&Reset_Handler)};
+__attribute__((used)) //
+const std::array<void *, 2>
+    application_isr_vector{&estack, reinterpret_cast<void *>(&application_reset)};
 
 __attribute__((used)) //
 const version::info version_info_struct_app{0x01'01'00001, 0x000000001, 0 /* unix time least 4 bytes */};

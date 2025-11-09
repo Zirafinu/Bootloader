@@ -75,7 +75,11 @@
       "device": "STM32H743",
       "svdFile": "examples/stm32h743/STM32H743.svd",
       "runToEntryPoint": "main",
-      "showDevDebugOutput": "none"
+      "showDevDebugOutput": "none",
+      "postLaunchCommands": [
+        "monitor reset halt",
+        "monitor arm semihosting enable",
+      ]
     }
   ]
 }

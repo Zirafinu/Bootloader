@@ -14,8 +14,8 @@ SECTIONS
 {
     /* map the embedded application into the application region */
     .app_test_flash : {
-        KEEP(*(.rodata*application*isr_vector*))
-        KEEP(*(.*application*Reset_Handler*))
+        KEEP(*(.rodata*application*application_isr_vector*))
+        KEEP(*(.*application*application_reset*))
     } > FLASH_APPLICATION
     /* has to match the size of the version struct */
     .app_version_info : {

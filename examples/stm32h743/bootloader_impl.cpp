@@ -31,6 +31,7 @@ void initialize_HAL_GetTick() {
     TIM2->CNT = ~0UL;
     TIM2->CR1 = TIM_CR1_CEN;
 }
+
 uint32_t HAL_GetTick() { return TIM2->CNT; }
 
 void terminate_program(int rc);
