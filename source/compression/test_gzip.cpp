@@ -29,7 +29,7 @@ int main() {
             return 1;
         if (out_memory.end() != out_memory_write)
             return 2;
-        if (std::strcmp(out_memory.data(), "test, test\n") != 0)
+        if (std::strncmp(out_memory.data(), "test, test\n", out_memory.size()) != 0)
             return 3;
     }
 
