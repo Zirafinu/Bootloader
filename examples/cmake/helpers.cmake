@@ -67,13 +67,14 @@ function (encrypt_target target)
         COMMAND ${CMAKE_OBJCOPY} ARGS --only-section=.version_info -Obinary $<TARGET_FILE:${target}> "${out_dir}/${target}.package"
         # place the key in the bootloader output file!
         COMMAND gzip ARGS -9 -f -n $<TARGET_FILE:${target}>.bin
-        COMMAND openssl ARGS enc -e -kfile ${BOOTLOADER_HELPER_SCRIPT_DIR}/../key.bin -iv ${iv} -aes-128-cbc -nosalt -in $<TARGET_FILE:${target}>.bin.gz -out $<TARGET_FILE:${target}>.bin.gz.encrypted
+        COMMAND sh ARGS -c 'tail --bytes +11 $<TARGET_FILE:${target}>.bin.gz | head --bytes -8 >$<TARGET_FILE:${target}>.bin.gz.cropped'
+        COMMAND openssl ARGS enc -e -K $$\(xxd -ps ${BOOTLOADER_HELPER_SCRIPT_DIR}/../key.bin\) -iv "${iv}" -aes-128-cbc -nosalt -in $<TARGET_FILE:${target}>.bin.gz.cropped -out $<TARGET_FILE:${target}>.bin.gz.encrypted
         COMMAND ${CMAKE_COMMAND} ARGS -E echo_append "${iv}" | xxd -r -ps >>"${out_dir}/${target}.package"
         COMMAND ${CMAKE_COMMAND} ARGS -E cat $<TARGET_FILE:${target}>.bin.gz.encrypted >>"${out_dir}/${target}.package"
-        COMMAND ${CMAKE_COMMAND} ARGS -E rm $<TARGET_FILE:${target}>.bin.gz $<TARGET_FILE:${target}>.bin.gz.encrypted
+        COMMAND ${CMAKE_COMMAND} ARGS -E rm $<TARGET_FILE:${target}>.bin.gz $<TARGET_FILE:${target}>.bin.gz.cropped $<TARGET_FILE:${target}>.bin.gz.encrypted
         DEPENDS $<TARGET_FILE:${target}>
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
-    # head -c 16 /dev/random > iv.bin ; arm-none-eabi-objcopy -O binary bootloader test ; cat test | gzip -c -9 -n - | openssl enc -e -K "$(hexdump -e '16/1 "%02X" /0 "\n"' key.bin)" -iv "$(hexdump -e '16/1 "%02X" /0 "\n"' iv.bin)" -aes-128-cbc -in - -out - | cat iv.bin - > bootloader.secret ; rm test
+    # head -c 16 /dev/random > iv.bin ; arm-none-eabi-objcopy -O binary bootloader test ; cat test | gzip -c -9 -n - | openssl enc -e -K "$(xxd -ps key.bin)" -iv "$(hexdump -e '16/1 "%02X" /0 "\n"' iv.bin)" -aes-128-cbc -in - -out - | cat iv.bin - > bootloader.secret ; rm test
     add_custom_target(encrypt_${target} ALL DEPENDS "${out_dir}/${target}.package")
 endfunction()
