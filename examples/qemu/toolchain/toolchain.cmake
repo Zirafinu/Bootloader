@@ -3,6 +3,9 @@ set(TARGET_CORE "")
 # Append current directory to CMAKE_MODULE_PATH for making device specific cmake modules visible
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
+# set(TARGET_CORE "qemu")
+include(${CMAKE_CURRENT_LIST_DIR}/generate_flash_layout_files.cmake)
+
 #---------------------------------------------------------------------------------------
 # Set compiler/linker flags
 #---------------------------------------------------------------------------------------
@@ -45,10 +48,18 @@ add_library(qemu_linkage INTERFACE)
 target_link_options(qemu_linkage INTERFACE
         -specs=nano.specs -Wl,-lc # reduced libc
         -specs=rdimon.specs -Wl,-lrdimon # arm semi hosting
-        -T${CMAKE_CURRENT_LIST_DIR}/memory_spec.ld # qemu target memories
-        -T${CMAKE_CURRENT_LIST_DIR}/region_alias.ld # memory mapping
+        -T${CMAKE_CURRENT_LIST_DIR}/memory_ram.ld # Ram Segment
+        -T${CMAKE_BINARY_DIR}/memory_spec.ld # qemu target memories
+        -T${CMAKE_CURRENT_LIST_DIR}/region_alias_bootloader_and_test.ld # memory mapping
         -T${CMAKE_CURRENT_LIST_DIR}/../../toolchains/section_mapping.ld # default section placement
 )
+set_property(TARGET qemu_linkage PROPERTY INTERFACE_LINK_DEPENDS
+        ${CMAKE_CURRENT_LIST_DIR}/memory_ram.ld
+        ${CMAKE_BINARY_DIR}/memory_spec.ld
+        ${CMAKE_CURRENT_LIST_DIR}/region_alias_bootloader_and_test.ld
+        ${CMAKE_CURRENT_LIST_DIR}/../../toolchains/section_mapping.ld
+)
+target_link_libraries(qemu_linkage INTERFACE flash_layout)
 
 add_library(linkage_bootloader INTERFACE)
 target_link_libraries(linkage_bootloader INTERFACE qemu_linkage)
@@ -68,5 +79,5 @@ set(CMAKE_CROSSCOMPILING_EMULATOR
         -cpu cortex-m4 -machine mps2-an386
         -monitor none -nographic
         -serial null -semihosting
-        -kernel # command to run here
+        -kernel # the executable is placed as the last argument
 )

@@ -1,5 +1,0 @@
-
-MEMORY
-{
-    BASE_RAM (rwx)    : ORIGIN = 0x00000000, LENGTH = 0x40000
-}
