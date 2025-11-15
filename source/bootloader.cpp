@@ -1,4 +1,6 @@
 #include "bootloader/bootloader.h"
+#include "bootloader/skip_application.h"
+
 #include <cstddef>
 #include <cstdint>
 

@@ -9,7 +9,7 @@ set(recrs_begin 0x0000C000)
 set(appli_begin 0x00010000)
 set(updat_begin 0x0002C000)
 
-set(total_size 2*1024*1024)
+set(total_size 248*1024)
 set(bootl_size 16*1024)
 set(param_size 16*1024)
 set(event_size 16*1024)

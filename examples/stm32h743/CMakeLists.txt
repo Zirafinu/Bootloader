@@ -3,32 +3,13 @@ target_link_libraries(linkage_bootloader INTERFACE cube)
 target_link_libraries(linkage_test INTERFACE cube)
 target_link_libraries(linkage_application INTERFACE cube)
 
-
-if(BUILD_TESTING)
-add_subdirectory(tests)
-endif()
-
-add_executable(stm32h743_bootloader bootloader_impl.cpp)
-target_link_libraries(stm32h743_bootloader PRIVATE
-    linkage_bootloader
-    flash_layout
-    Bootloader::core
-    Bootloader::skip_application_impl
-    Bootloader::crc_impl
-    Bootloader::gzip
-    Bootloader::version_info
-    Bootloader::crypto_impl
-)
-add_custom_command(TARGET stm32h743_bootloader POST_BUILD
-    COMMAND ${CMAKE_OBJCOPY}  ARGS --update-section ".secrets=${CMAKE_CURRENT_LIST_DIR}/../key.bin" $<TARGET_FILE:stm32h743_bootloader>
-)
-update_build_time_and_crc(stm32h743_bootloader)
+target_sources(bootloader_example_test INTERFACE hardware_specific.cpp)
+target_sources(bootloader_example PRIVATE hardware_specific.cpp)
 add_custom_command(
-    OUTPUT stm32h743_bootloader.srec
-    COMMAND ${CMAKE_OBJCOPY} ARGS --srec-len=255 -O srec $<TARGET_FILE:stm32h743_bootloader> stm32h743_bootloader.srec
-    DEPENDS stm32h743_bootloader
+    OUTPUT bootloader_example.srec
+    COMMAND ${CMAKE_OBJCOPY} ARGS --srec-len=255 -O srec $<TARGET_FILE:bootloader_example> bootloader_example.srec
+    DEPENDS bootloader_example
 )
-
 
 add_executable(blinky blinky.cpp)
 target_link_libraries(blinky PRIVATE
@@ -43,4 +24,4 @@ add_custom_command(
 )
 
 encrypt_target(blinky)
-join_bootloader_with_application(stm32h743_bootloader.srec blinky.srec)
+join_bootloader_with_application(bootloader_example.srec blinky.srec)

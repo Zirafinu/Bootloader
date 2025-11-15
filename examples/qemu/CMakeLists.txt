@@ -1,0 +1,2 @@
+target_sources(bootloader_example PRIVATE hardware_specific.cpp)
+target_sources(bootloader_example_test INTERFACE hardware_specific.cpp)

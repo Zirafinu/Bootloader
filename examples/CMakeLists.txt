@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(micro_bootloader_stm32f407_example CXX C ASM)
+project(bootloader_example CXX C ASM)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -10,6 +10,7 @@ include(CTest)
 enable_testing()
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../source ${CMAKE_CURRENT_BINARY_DIR}/bootloader)
+add_subdirectory(common)
 
 if(TARGET_CORE)
     add_subdirectory(${TARGET_CORE})

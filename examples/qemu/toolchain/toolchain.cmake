@@ -1,9 +1,8 @@
-set(TARGET_CORE "")
+set(TARGET_CORE "qemu")
 
 # Append current directory to CMAKE_MODULE_PATH for making device specific cmake modules visible
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
-# set(TARGET_CORE "qemu")
 include(${CMAKE_CURRENT_LIST_DIR}/generate_flash_layout_files.cmake)
 
 #---------------------------------------------------------------------------------------
@@ -43,9 +42,9 @@ set(CMAKE_EXE_LINKER_FLAGS_INIT " -Wl,--gc-sections -fno-exceptions" CACHE INTER
 
 include(${CMAKE_CURRENT_LIST_DIR}/../../toolchains/arm_none_eabi.cmake)
 
-if(NOT TARGET qemu_linkage)
-add_library(qemu_linkage INTERFACE)
-target_link_options(qemu_linkage INTERFACE
+if(NOT TARGET linkage_bootloader)
+add_library(linkage_bootloader INTERFACE)
+target_link_options(linkage_bootloader INTERFACE
         -specs=nano.specs -Wl,-lc # reduced libc
         -specs=rdimon.specs -Wl,-lrdimon # arm semi hosting
         -T${CMAKE_CURRENT_LIST_DIR}/memory_ram.ld # Ram Segment
@@ -53,22 +52,35 @@ target_link_options(qemu_linkage INTERFACE
         -T${CMAKE_CURRENT_LIST_DIR}/region_alias_bootloader_and_test.ld # memory mapping
         -T${CMAKE_CURRENT_LIST_DIR}/../../toolchains/section_mapping.ld # default section placement
 )
-set_property(TARGET qemu_linkage PROPERTY INTERFACE_LINK_DEPENDS
+set_property(TARGET linkage_bootloader PROPERTY INTERFACE_LINK_DEPENDS
         ${CMAKE_CURRENT_LIST_DIR}/memory_ram.ld
         ${CMAKE_BINARY_DIR}/memory_spec.ld
         ${CMAKE_CURRENT_LIST_DIR}/region_alias_bootloader_and_test.ld
         ${CMAKE_CURRENT_LIST_DIR}/../../toolchains/section_mapping.ld
 )
-target_link_libraries(qemu_linkage INTERFACE flash_layout)
-
-add_library(linkage_bootloader INTERFACE)
-target_link_libraries(linkage_bootloader INTERFACE qemu_linkage)
+target_link_libraries(linkage_bootloader INTERFACE flash_layout)
 
 add_library(linkage_test INTERFACE)
-target_link_libraries(linkage_test INTERFACE qemu_linkage)
+target_link_libraries(linkage_test INTERFACE linkage_bootloader)
+
+add_library(linkage_semihosting INTERFACE) # semi hosting is always on
 
 add_library(linkage_application INTERFACE)
-target_link_libraries(linkage_application INTERFACE qemu_linkage)
+target_link_options(linkage_application INTERFACE
+        -specs=nano.specs -Wl,-lc # reduced libc
+        -specs=rdimon.specs -Wl,-lrdimon # arm semi hosting
+        -T${CMAKE_CURRENT_LIST_DIR}/memory_ram.ld # Ram Segment
+        -T${CMAKE_BINARY_DIR}/memory_spec.ld # qemu target memories
+        -T${CMAKE_CURRENT_LIST_DIR}/region_alias_application.ld # memory mapping
+        -T${CMAKE_CURRENT_LIST_DIR}/../../toolchains/section_mapping.ld # default section placement
+)
+set_property(TARGET linkage_application PROPERTY INTERFACE_LINK_DEPENDS
+        ${CMAKE_CURRENT_LIST_DIR}/memory_ram.ld
+        ${CMAKE_BINARY_DIR}/memory_spec.ld
+        ${CMAKE_CURRENT_LIST_DIR}/region_alias_application.ld
+        ${CMAKE_CURRENT_LIST_DIR}/../../toolchains/section_mapping.ld
+)
+target_link_libraries(linkage_application INTERFACE flash_layout)
 endif()
 
 #---------------------------------------------------------------------------------------

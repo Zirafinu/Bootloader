@@ -1,5 +1,8 @@
-#ifndef BOOTLOADER_BOOTLOADER_H_
-#define BOOTLOADER_BOOTLOADER_H_
+#include <bootloader/version_info.h>
+
+extern "C" __attribute__((used)) const uint8_t application{0};
+extern "C" __attribute__((used)) const uint8_t update{0};
+extern "C" __attribute__((used)) const uint32_t bootloader_crc{0};
 
 namespace bootloader {
 
@@ -29,4 +32,22 @@ bool application_update_is_valid(bool is_application_memory_valid) noexcept;
 bool copy_update_to_application() noexcept;
 } // namespace bootloader
 
-#endif
+int main() {
+    if (!bootloader::application_is_valid()) {
+        return 1;
+    }
+
+    if (!bootloader::application_update_is_valid(false)) {
+        return 2;
+    }
+
+    if (!bootloader::application_update_is_valid(true)) {
+        return 3;
+    }
+
+    if (!bootloader::copy_update_to_application()) {
+        return 4;
+    }
+
+    return 5;
+}
