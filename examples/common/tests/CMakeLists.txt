@@ -33,9 +33,12 @@ add_custom_command(
     COMMAND truncate -s ${update_section_size} "${out_dir}/demo_application.package.update"
     COMMAND sh ARGS -c 'cat ${out_dir}/demo_application.package.update | gzip | tail --bytes=8 | head --bytes=4 >>${out_dir}/demo_application.package.update'
     COMMAND COMMAND ${CMAKE_OBJCOPY} ARGS --update-section ".update_placeholder=${out_dir}/demo_application.package.update" $<TARGET_FILE:test_implementation>
-    DEPENDS ${out_dir}/demo_application.package
     BYPRODUCTS ${out_dir}/demo_application.package.update
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 
 add_test(NAME test_implementation COMMAND test_implementation)
+
+add_executable(test_failing_test failing_test.cpp)
+add_test(NAME test_failing_test COMMAND test_failing_test)
+set_tests_properties(test_failing_test PROPERTIES WILL_FAIL true)
