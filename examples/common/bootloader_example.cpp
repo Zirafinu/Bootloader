@@ -113,8 +113,7 @@ bool copy_update_to_application() noexcept {
         decltype(read_iterator){decrypt_iterator{encrypted_area + 1, *encrypted_area, &expanded_keys}};
 
     // initialize the output iterator
-    write_application_it =
-        reinterpret_cast<uint8_t *>(const_cast<size_t *>(&flash_layout::application_begin));
+    write_application_it = reinterpret_cast<uint8_t *>(flash_layout::application_begin);
 
     gzip::Inflate inflator{can_read_more, read_update_flash, write_application, read_application};
     const bool updated = inflator.decode();
