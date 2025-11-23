@@ -6,14 +6,14 @@ REGION_ALIAS("STACK_RAM", RAM_ACTIVE)
 REGION_ALIAS("HEAP_RAM", RAM_ACTIVE)
 REGION_ALIAS("RAM", RAM_ACTIVE)
 
-ENTRY(_start)
+ENTRY(Reset_Handler)
 
 SECTIONS
 {
     /* initialize the minimal vector table */
     .ISR_VECTOR_QEMU_PATCH : ALIGN(512) {
         LONG(estack);
-        LONG(_start+1);
+        LONG(Reset_Handler+1);
     } > FLASH
 
     /* has to match the size of the version struct */

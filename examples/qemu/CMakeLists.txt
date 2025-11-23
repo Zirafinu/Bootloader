@@ -1,2 +1,5 @@
 target_sources(bootloader_example PRIVATE hardware_specific.cpp)
 target_sources(bootloader_example_test INTERFACE hardware_specific.cpp)
+
+target_sources(linkage_bootloader INTERFACE startup.c)
+target_sources(linkage_application INTERFACE startup.c)
