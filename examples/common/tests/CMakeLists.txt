@@ -39,6 +39,6 @@ add_custom_command(
 
 add_test(NAME test_implementation COMMAND test_implementation)
 
-add_executable(test_failing_test failing_test.cpp)
+add_executable(test_failing_test test_failing_test.cpp)
 add_test(NAME test_failing_test COMMAND test_failing_test)
 set_tests_properties(test_failing_test PROPERTIES WILL_FAIL true)
