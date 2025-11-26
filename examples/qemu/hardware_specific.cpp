@@ -18,7 +18,7 @@ bool flush_write_buffer(uint8_t *dst, std::array<uint8_t, 1024> const &data, std
 
 [[nodiscard]]
 bool erase_application() {
-    std::memset(reinterpret_cast<uint8_t *>(flash_layout::application_begin), 0,
+    std::memset(reinterpret_cast<uint8_t *>(flash_layout::application_begin), 0xFF,
                 flash_layout::application_end - flash_layout::application_begin);
     return true;
 }

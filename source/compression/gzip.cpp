@@ -70,12 +70,12 @@ Header Header::parse(uint8_t const *start, uint8_t const *end) {
     return result;
 }
 
-int construct(std::array<uint8_t, 16> &tree_count, uint16_t *tree_symbols, const uint8_t *length,
+int construct(std::array<uint16_t, 16> &tree_count, uint16_t *tree_symbols, const uint16_t *length,
               std::size_t symbol_count) noexcept {
     std::remove_cvref_t<decltype(tree_count)> offs; /* offsets in symbol table for each length */
 
     /* count number of codes of each length */
-    memset(tree_count.data(), 0, sizeof(tree_count));
+    tree_count.fill(0);
 
     for (std::size_t symbol = 0; symbol < symbol_count; ++symbol) { /* assumes lengths are within bounds */
         ++tree_count[length[symbol]];
@@ -114,11 +114,11 @@ int construct(std::array<uint8_t, 16> &tree_count, uint16_t *tree_symbols, const
 }
 
 auto detail::SymbolHuffmanTree::construct_fixed() noexcept -> SymbolHuffmanTree {
-    std::array<uint8_t, FIXED_LITERAL_LENGTH_CODES> lengths{};
-    std::memset(&lengths[0], 8, 144);
-    std::memset(&lengths[144], 9, 256 - 144);
-    std::memset(&lengths[256], 7, 280 - 256);
-    std::memset(&lengths[280], 8, FIXED_LITERAL_LENGTH_CODES - 280);
+    std::array<uint16_t, FIXED_LITERAL_LENGTH_CODES> lengths{};
+    auto const segment1 = std::fill_n(lengths.begin(), 144, 8);
+    auto const segment2 = std::fill_n(segment1, 256 - 144, 9);
+    auto const segment3 = std::fill_n(segment2, 280 - 256, 7);
+    (void)std::fill_n(segment3, FIXED_LITERAL_LENGTH_CODES - 280, 8);
 
     SymbolHuffmanTree result{};
     (void)construct(result.count, result.symbols.data(), lengths.data(), lengths.size());
@@ -126,8 +126,8 @@ auto detail::SymbolHuffmanTree::construct_fixed() noexcept -> SymbolHuffmanTree 
 }
 
 auto detail::DistanceHuffmanTree::construct_fixed() noexcept -> DistanceHuffmanTree {
-    std::array<uint8_t, MAX_DISTANCE_CODES> lengths;
-    std::memset(&lengths[0], 5, MAX_DISTANCE_CODES);
+    std::array<uint16_t, MAX_DISTANCE_CODES> lengths{};
+    lengths.fill(5);
 
     DistanceHuffmanTree result{};
     (void)construct(result.count, result.symbols.data(), lengths.data(), lengths.size());
@@ -199,8 +199,7 @@ bool Inflate::inflate_fixed() noexcept {
 }
 
 bool Inflate::inflate_dynamic() noexcept {
-    int err;                                        /* construct() return value */
-    uint8_t lengths[detail::MAX_LENGTH_CODE_COUNT]; /* descriptor code lengths */
+    uint16_t lengths[detail::MAX_LENGTH_CODE_COUNT]; /* descriptor code lengths */
     static const short order[19] =                  /* permutation of code length codes */
         {16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
 
@@ -218,23 +217,20 @@ bool Inflate::inflate_dynamic() noexcept {
         lengths[order[index]] = 0;
 
     /* build huffman table for code lengths codes (use lencode temporarily) */
-    err = construct(mLiteral_tree.count, mLiteral_tree.symbols.data(), lengths, 19);
+    int err = construct(mLiteral_tree.count, mLiteral_tree.symbols.data(), lengths, 19);
     if (err != 0) /* require complete code set here */
         return true;
 
     /* read length/literal and distance code length tables */
     std::size_t index = 0;
     while (index < (nlen + ndist)) {
-        int symbol; /* decoded value */
-        int len;    /* last length to repeat */
-
-        symbol = decode_symbol();
+        int32_t symbol = decode_symbol();
         if (symbol < 0)
             return true; /* invalid symbol */
         if (symbol < 16) /* length in 0..15 */
             lengths[index++] = symbol;
         else {                  /* repeat instruction */
-            len = 0;            /* assume repeating zeros */
+            uint32_t len = 0;            /* assume repeating zeros */
             if (symbol == 16) { /* repeat last length 3..6 times */
                 if (index == 0)
                     return true;          /* no last length! */
@@ -270,20 +266,6 @@ bool Inflate::inflate_dynamic() noexcept {
 }
 
 bool Inflate::codes() noexcept {
-    constexpr std::array<uint16_t, 29> length_symbols = {/* Size base for length codes 257..285 */
-                                                         3,  4,  5,  6,   7,   8,   9,   10,  11, 13,
-                                                         15, 17, 19, 23,  27,  31,  35,  43,  51, 59,
-                                                         67, 83, 99, 115, 131, 163, 195, 227, 258};
-    constexpr std::array<uint8_t, 29> length_symbol_extra_bits = {/* Extra bits for length codes 257..285 */
-                                                                  0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2,
-                                                                  2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0};
-    constexpr std::array<uint16_t, 30> distance_symbols = {
-        /* Offset base for distance codes 0..29 */
-        1,   2,   3,   4,   5,   7,    9,    13,   17,   25,   33,   49,   65,    97,    129,
-        193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577};
-    constexpr std::array<uint8_t, 30> distance_symbol_extra_bits = {
-        /* Extra bits for distance codes 0..29 */
-        0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13};
 
     /* decode literals and length/distance pairs */
     while (true) {
@@ -296,13 +278,28 @@ bool Inflate::codes() noexcept {
             write(literal);
         } else if (symbol == 256) { /* done with a valid fixed or dynamic block */
             return false;
-        } else if (symbol > 256) { /* length */
+        } else  { /* if (symbol > 256) length */
+            constexpr std::array<uint16_t, 29> length_symbols = {/* Size base for length codes 257..285 */
+                3,  4,  5,  6,   7,   8,   9,   10,  11, 13,
+                15, 17, 19, 23,  27,  31,  35,  43,  51, 59,
+                67, 83, 99, 115, 131, 163, 195, 227, 258};
+            constexpr std::array<uint8_t, 29> length_symbol_extra_bits = {/* Extra bits for length codes 257..285 */
+                0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2,
+                2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0};
+            constexpr std::array<uint16_t, 30> distance_symbols = {
+                /* Offset base for distance codes 0..29 */
+                1,   2,   3,   4,   5,   7,    9,    13,   17,   25,   33,   49,   65,    97,    129,
+                193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577};
+            constexpr std::array<uint8_t, 30> distance_symbol_extra_bits = {
+                /* Extra bits for distance codes 0..29 */
+                0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13};
+
             /* get and compute length */
             const uint32_t length_index = symbol - 257;
             if (length_index >= length_symbols.size()) { /* invalid length code literal */
                 return true;
             }
-            const int32_t length =
+            const uint32_t length =
                 length_symbols[length_index] + read_bits(length_symbol_extra_bits[length_index]);
 
             /* get and check distance */
@@ -313,7 +310,7 @@ bool Inflate::codes() noexcept {
                 distance_symbols[distance_index] + read_bits(distance_symbol_extra_bits[distance_index]);
 
             /* copy length bytes from distance bytes back */
-            for (auto i = 0; i < length; ++i) {
+            for (uint32_t i = 0; i < length; ++i) {
                 write(read_old(distance));
             }
         }
@@ -323,7 +320,7 @@ bool Inflate::codes() noexcept {
     return true;
 }
 
-int32_t Inflate::decode_(const uint8_t *const counts, const uint16_t *symbols) noexcept {
+int32_t Inflate::decode_(const uint16_t *const counts, const uint16_t *symbols) noexcept {
     size_t code = 0;  /* len bits being decoded */
     size_t first = 0; /* first code of length len */
 

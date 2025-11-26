@@ -66,13 +66,13 @@ static constexpr std::size_t MAX_LITERAL_LENGTH_CODE_COUNT = FIXED_LITERAL_LENGT
 static constexpr std::size_t MAX_LENGTH_CODE_COUNT = MAX_LITERAL_LENGTH_CODES + MAX_DISTANCE_CODES;
 
 struct SymbolHuffmanTree {
-    std::array<uint8_t, MAX_BITS + 1> count;
+    std::array<uint16_t, MAX_BITS + 1> count;
     std::array<uint16_t, MAX_LITERAL_LENGTH_CODE_COUNT> symbols;
 
     static SymbolHuffmanTree construct_fixed() noexcept;
 };
 struct DistanceHuffmanTree {
-    std::array<uint8_t, MAX_BITS + 1> count;
+    std::array<uint16_t, MAX_BITS + 1> count;
     std::array<uint16_t, MAX_DISTANCE_CODES> symbols;
 
     static DistanceHuffmanTree construct_fixed() noexcept;
@@ -113,7 +113,7 @@ class Inflate {
 
     bool codes() noexcept;
 
-    int32_t decode_(const uint8_t *const, const uint16_t *const) noexcept;
+    int32_t decode_(const uint16_t *const, const uint16_t *const) noexcept;
     int32_t decode_symbol() noexcept {
         return decode_(mLiteral_tree.count.data(), mLiteral_tree.symbols.data());
     }

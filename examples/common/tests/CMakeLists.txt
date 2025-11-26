@@ -36,6 +36,7 @@ add_custom_command(
     BYPRODUCTS ${out_dir}/demo_application.package.update
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
+set_target_properties(test_implementation PROPERTIES LINK_DEPENDS encrypt_demo_application)
 
 add_test(NAME test_implementation COMMAND test_implementation)
 

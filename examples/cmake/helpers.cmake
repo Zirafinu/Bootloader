@@ -63,7 +63,7 @@ function (encrypt_target target)
     string(RANDOM LENGTH 32 ALPHABET "0123456789ABCDEF" iv)
     add_custom_command(
         OUTPUT "${out_dir}/${target}.package"
-        COMMAND ${CMAKE_OBJCOPY} ARGS -O binary $<TARGET_FILE:${target}> $<TARGET_FILE:${target}>.bin
+        COMMAND ${CMAKE_OBJCOPY} ARGS --gap-fill 0xFF -O binary $<TARGET_FILE:${target}> $<TARGET_FILE:${target}>.bin
         COMMAND ${CMAKE_OBJCOPY} ARGS --only-section=.version_info -Obinary $<TARGET_FILE:${target}> "${out_dir}/${target}.package"
         # place the key in the bootloader output file!
         COMMAND gzip ARGS -9 -f -n $<TARGET_FILE:${target}>.bin
