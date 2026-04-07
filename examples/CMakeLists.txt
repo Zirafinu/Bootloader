@@ -1,22 +1,13 @@
-cmake_minimum_required(VERSION 3.28)
-project(bootloader_example CXX C ASM)
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 include(cmake/helpers.cmake)
 
-include(CTest)
-enable_testing()
-
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../source ${CMAKE_CURRENT_BINARY_DIR}/bootloader)
 add_subdirectory(common)
 
 if(TARGET_CORE)
     add_subdirectory(${TARGET_CORE})
 endif()
 
-_get_all_cmake_targets(all_targets ${CMAKE_CURRENT_LIST_DIR})
+
+_get_all_cmake_targets(all_targets "${CMAKE_CURRENT_LIST_DIR}/..")
 foreach (target ${all_targets})
     get_target_property(target_type ${target} TYPE)
     if (${target_type} MATCHES "EXECUTABLE")

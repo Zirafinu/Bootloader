@@ -2,8 +2,6 @@
 /build/
 /Testing/
 
-/examples/build/
-/examples/Testing/
 # don't push the secrets
 /examples/key.bin
 

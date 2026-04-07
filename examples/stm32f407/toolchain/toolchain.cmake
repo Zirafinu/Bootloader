@@ -15,7 +15,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/generate_flash_layout_files.cmake)
 # -mfloat-abi=hard  float abi
 # -mthumb           Generat thumb instructions.
 # -mabi=aapcs       Defines enums to be a variable sized type.
-# -nostartfiles             Don't link the compilers start files
+# -nostartfiles     Don't link the compilers start files
 set(CPU_GEN_FLAGS "-mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mabi=aapcs -nostartfiles")
 
 # Warning Flags
@@ -38,9 +38,9 @@ set(CMAKE_CXX_FLAGS_INIT "${OBJECT_GEN_FLAGS} -fno-rtti -fno-exceptions -fno-thr
 set(CMAKE_ASM_FLAGS_INIT "${OBJECT_GEN_FLAGS} -x assembler-with-cpp  -MMD -MP " CACHE INTERNAL "ASM Compiler options")
 
 
+# -Wl,--fatal-warnings  Fail the build if warnings are generated
 # -Wl,--gc-sections     Perform the dead code elimination.
-# -nostartfiles             Don't link the compilers start files
-set(CMAKE_EXE_LINKER_FLAGS_INIT " ${CPU_GEN_FLAGS} -Wl,--gc-sections" CACHE INTERNAL "Linker options")
+set(CMAKE_EXE_LINKER_FLAGS_INIT " -Wl,--fatal-warnings -Wl,--gc-sections" CACHE INTERNAL "Linker options")
 
 include(${CMAKE_CURRENT_LIST_DIR}/../../toolchains/arm_none_eabi.cmake)
 

@@ -1,9 +1,9 @@
-set(TARGET_CORE "qemu")
-
 # Append current directory to CMAKE_MODULE_PATH for making device specific cmake modules visible
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
+set(TARGET_CORE "qemu")
 include(${CMAKE_CURRENT_LIST_DIR}/generate_flash_layout_files.cmake)
+
 
 #---------------------------------------------------------------------------------------
 # Set compiler/linker flags
@@ -15,7 +15,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/generate_flash_layout_files.cmake)
 # -mfloat-abi=hard  float abi
 # -mthumb           Generat thumb instructions.
 # -mabi=aapcs       Defines enums to be a variable sized type.
-# -fno-exceptions           Disable exceptions
+# -fno-exceptions   Disable exceptions
 set(CPU_GEN_FLAGS "-mcpu=cortex-m4 -mthumb -mabi=aapcs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -fno-exceptions")
 
 # Warning Flags
@@ -35,16 +35,19 @@ set(CMAKE_C_FLAGS_INIT   "${OBJECT_GEN_FLAGS} " CACHE INTERNAL "C Compiler optio
 set(CMAKE_CXX_FLAGS_INIT "${OBJECT_GEN_FLAGS} -fno-threadsafe-statics " CACHE INTERNAL "C++ Compiler options")
 set(CMAKE_ASM_FLAGS_INIT "${OBJECT_GEN_FLAGS} -x assembler-with-cpp  -MMD -MP " CACHE INTERNAL "ASM Compiler options")
 
-
+# -Wl,--fatal-warnings  Fail the build if warnings are generated
 # -Wl,--gc-sections     Perform the dead code elimination.
-# -fno-exceptions           Disable exceptions
-set(CMAKE_EXE_LINKER_FLAGS_INIT " -Wl,--gc-sections -fno-exceptions" CACHE INTERNAL "Linker options")
+# -fno-exceptions       Disable exceptions
+set(CMAKE_EXE_LINKER_FLAGS_INIT " -Wl,--fatal-warnings -Wl,--gc-sections -fno-exceptions" CACHE INTERNAL "Linker options")
 
 include(${CMAKE_CURRENT_LIST_DIR}/../../toolchains/arm_none_eabi.cmake)
 
+
 if(NOT TARGET linkage_bootloader)
+# --------------------------BOOTLOADER------------------------------------------------------------
 add_library(linkage_bootloader INTERFACE)
 target_link_options(linkage_bootloader INTERFACE
+        -Wl,--print-memory-usage # print memory usage
         -specs=nano.specs -Wl,-lc # reduced libc
         -specs=rdimon.specs -Wl,-lrdimon # arm semi hosting
         -T${CMAKE_CURRENT_LIST_DIR}/memory_ram.ld # Ram Segment
@@ -59,14 +62,15 @@ set_property(TARGET linkage_bootloader PROPERTY INTERFACE_LINK_DEPENDS
         ${CMAKE_CURRENT_LIST_DIR}/../../toolchains/section_mapping.ld
 )
 target_link_libraries(linkage_bootloader INTERFACE flash_layout)
-
+# --------------------------SEMIHOSTING-----------------------------------------------------------
+add_library(linkage_semihosting INTERFACE) # semi hosting is always on
+# --------------------------TESTING---------------------------------------------------------------
 add_library(linkage_test INTERFACE)
 target_link_libraries(linkage_test INTERFACE linkage_bootloader)
-
-add_library(linkage_semihosting INTERFACE) # semi hosting is always on
-
+# --------------------------APPLICATION------------------------------------------------------------
 add_library(linkage_application INTERFACE)
 target_link_options(linkage_application INTERFACE
+        -Wl,--print-memory-usage # print memory usage
         -specs=nano.specs -Wl,-lc # reduced libc
         -specs=rdimon.specs -Wl,-lrdimon # arm semi hosting
         -T${CMAKE_CURRENT_LIST_DIR}/memory_ram.ld # Ram Segment

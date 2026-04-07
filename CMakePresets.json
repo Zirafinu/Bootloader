@@ -1,39 +1,97 @@
 {
-    "version": 8,
-    "cmakeMinimumRequired":{
-        "major": 3,
-        "minor":28,
-        "patch": 0
+  "version": 8,
+  "cmakeMinimumRequired": { "major": 3, "minor": 28, "patch": 0 },
+  "configurePresets": [
+    { "name": "default", "hidden": true, "generator": "Ninja", "binaryDir": "${sourceDir}/build/${presetName}" },
+    { "name": "Release", "inherits": ["default"], "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" } },
+    { "name": "Debug", "inherits": ["default"], "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" } },
+    { "name": "Examples", "hidden": true, "inherits": ["default"], "cacheVariables": { "EXAMPLE": "On" } },
+    {
+      "name": "Release_F407",
+      "inherits": ["Examples", "Release"],
+      "toolchainFile": "examples/stm32f407/toolchain/toolchain.cmake"
     },
-    "configurePresets":[
-        {
-            "name":"default",
-            "generator":"Ninja",
-            "binaryDir":"${sourceDir}/build/${presetName}"
-        },
-        {"name": "Release", "inherits":["default"], "cacheVariables": {"CMAKE_BUILD_TYPE":"Release"}},
-        {"name": "Debug", "inherits":["default"], "cacheVariables": {"CMAKE_BUILD_TYPE":"Debug"}}
-    ],
-    "buildPresets":[
-        {
-            "name": "Debug", "configurePreset": "Debug"
-        }
-    ],
-    "testPresets":[
-        {
-            "name": "Debug",
-            "configurePreset": "Debug",
-            "output": {"outputOnFailure": true}
-        }
-    ],
-    "workflowPresets": [
-        {
-            "name": "Debug",
-            "steps": [
-                { "type": "configure", "name":"Debug" },
-                { "type": "build", "name": "Debug" },
-                { "type": "test", "name" : "Debug" }
-            ]
-        }
-    ]
+    {
+      "name": "Debug_F407",
+      "inherits": ["Examples", "Debug"],
+      "toolchainFile": "examples/stm32f407/toolchain/toolchain.cmake"
+    },
+    {
+      "name": "Debug_H743",
+      "inherits": ["Examples", "Debug"],
+      "toolchainFile": "examples/stm32h743/toolchain/toolchain.cmake"
+    },
+    {
+      "name": "Release_H743",
+      "inherits": ["Examples", "Release"],
+      "toolchainFile": "examples/stm32h743/toolchain/toolchain.cmake"
+    },
+    {
+      "name": "test_in_qemu",
+      "inherits": ["Examples", "Debug"],
+      "toolchainFile": "examples/qemu/toolchain/toolchain.cmake"
+    }
+  ],
+  "buildPresets": [
+    { "name": "Debug", "configurePreset": "Debug" },
+    { "name": "Release_F407", "configurePreset": "Release_F407" },
+    { "name": "Debug_F407", "configurePreset": "Debug_F407" },
+    { "name": "Debug_H743", "configurePreset": "Debug_H743" },
+    { "name": "Release_H743", "configurePreset": "Release_H743" },
+    { "name": "test_in_qemu", "configurePreset": "test_in_qemu" }
+  ],
+  "testPresets": [
+    { "name": "Debug", "configurePreset": "Debug", "output": { "outputOnFailure": true } },
+    { "name": "Release_F407", "configurePreset": "Release_F407", "output": { "outputOnFailure": true } },
+    { "name": "Release_H743", "configurePreset": "Release_H743", "output": { "outputOnFailure": true } },
+    { "name": "test_in_qemu", "configurePreset": "test_in_qemu", "output": { "outputOnFailure": true } }
+  ],
+  "workflowPresets": [
+    {
+      "name": "Debug",
+      "steps": [
+        { "type": "configure", "name": "Debug" },
+        { "type": "build", "name": "Debug" },
+        { "type": "test", "name": "Debug" }
+      ]
+    },
+    {
+      "name": "Release_F407",
+      "steps": [
+        { "type": "configure", "name": "Release_F407" },
+        { "type": "build", "name": "Release_F407" },
+        { "type": "test", "name": "Release_F407" }
+      ]
+    },
+    {
+      "name": "Debug_F407",
+      "steps": [
+        { "type": "configure", "name": "Debug_F407" },
+        { "type": "build", "name": "Debug_F407" }
+      ]
+    },
+    {
+      "name": "Release_H743",
+      "steps": [
+        { "type": "configure", "name": "Release_H743" },
+        { "type": "build", "name": "Release_H743" },
+        { "type": "test", "name": "Release_H743" }
+      ]
+    },
+    {
+      "name": "Debug_H743",
+      "steps": [
+        { "type": "configure", "name": "Debug_H743" },
+        { "type": "build", "name": "Debug_H743" }
+      ]
+    },
+    {
+      "name": "test_in_qemu",
+      "steps": [
+        { "type": "configure", "name": "test_in_qemu" },
+        { "type": "build", "name": "test_in_qemu" },
+        { "type": "test", "name": "test_in_qemu" }
+      ]
+    }
+  ]
 }
