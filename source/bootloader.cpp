@@ -46,7 +46,7 @@ bool update_application(bool is_application_memory_valid) noexcept {
 }
 } // namespace
 
-extern "C" int main() noexcept {
+int main() {
     const Application_State state = launch_application();
     if (state == Application_State::Invalid || state == Application_State::Update) {
         if (update_application(state == Application_State::Invalid)) {

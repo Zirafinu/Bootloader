@@ -16,7 +16,8 @@ include(${CMAKE_CURRENT_LIST_DIR}/generate_flash_layout_files.cmake)
 # -mthumb           Generat thumb instructions.
 # -mabi=aapcs       Defines enums to be a variable sized type.
 # -nostartfiles     Don't link the compilers start files
-set(CPU_GEN_FLAGS "-mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mabi=aapcs -nostartfiles")
+# -fshort-wchar     Use 2-byte wchar_t to match nano libc ABI
+set(CPU_GEN_FLAGS "-mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mabi=aapcs -nostartfiles -fshort-wchar")
 
 # Warning Flags
 # -Wall -Wextra -Wpedantic  Print all warnings
@@ -76,6 +77,7 @@ target_compile_definitions(linkage_semihosting INTERFACE
 # --------------------------TESTING---------------------------------------------------------------
 add_library(linkage_test INTERFACE)
 target_link_options(linkage_test INTERFACE
+        -Wl,--no-warn-rwx-segments # Read only data in RAM is expected
         -Wl,--print-memory-usage # print memory usage
         -specs=nano.specs -Wl,-lc # reduced libc
         -specs=rdimon.specs -Wl,-lrdimon # enable semihosting

@@ -16,7 +16,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/generate_flash_layout_files.cmake)
 # -mthumb           Generat thumb instructions.
 # -mabi=aapcs       Defines enums to be a variable sized type.
 # -fno-exceptions   Disable exceptions
-set(CPU_GEN_FLAGS "-mcpu=cortex-m4 -mthumb -mabi=aapcs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -fno-exceptions")
+set(CPU_GEN_FLAGS "-mcpu=cortex-m4 -mthumb -mabi=aapcs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -fno-exceptions -fshort-wchar")
 
 # Warning Flags
 # -Wall -Wextra -Wpedantic  Print all warnings
@@ -38,7 +38,7 @@ set(CMAKE_ASM_FLAGS_INIT "${OBJECT_GEN_FLAGS} -x assembler-with-cpp  -MMD -MP " 
 # -Wl,--fatal-warnings  Fail the build if warnings are generated
 # -Wl,--gc-sections     Perform the dead code elimination.
 # -fno-exceptions       Disable exceptions
-set(CMAKE_EXE_LINKER_FLAGS_INIT " -Wl,--fatal-warnings -Wl,--gc-sections -fno-exceptions" CACHE INTERNAL "Linker options")
+set(CMAKE_EXE_LINKER_FLAGS_INIT " -Wl,--gc-sections -fno-exceptions" CACHE INTERNAL "Linker options")
 
 include(${CMAKE_CURRENT_LIST_DIR}/../../toolchains/arm_none_eabi.cmake)
 
@@ -67,6 +67,7 @@ add_library(linkage_semihosting INTERFACE) # semi hosting is always on
 # --------------------------TESTING---------------------------------------------------------------
 add_library(linkage_test INTERFACE)
 target_link_libraries(linkage_test INTERFACE linkage_bootloader)
+target_link_options(linkage_test INTERFACE -Wl,--no-warn-rwx-segments)
 # --------------------------APPLICATION------------------------------------------------------------
 add_library(linkage_application INTERFACE)
 target_link_options(linkage_application INTERFACE

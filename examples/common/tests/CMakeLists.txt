@@ -31,7 +31,7 @@ add_custom_command(
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} ARGS -E copy "${out_dir}/demo_application.package" "${out_dir}/demo_application.package.update"
     COMMAND truncate -s ${update_section_size} "${out_dir}/demo_application.package.update"
-    COMMAND sh ARGS -c 'cat ${out_dir}/demo_application.package.update | gzip | tail --bytes=8 | head --bytes=4 >>${out_dir}/demo_application.package.update'
+    COMMAND sh ARGS -c 'cat ${out_dir}/demo_application.package.update | gzip | tail -c 8 | head -c 4 >>${out_dir}/demo_application.package.update'
     COMMAND COMMAND ${CMAKE_OBJCOPY} ARGS --update-section ".update_placeholder=${out_dir}/demo_application.package.update" $<TARGET_FILE:test_implementation>
     BYPRODUCTS ${out_dir}/demo_application.package.update
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}

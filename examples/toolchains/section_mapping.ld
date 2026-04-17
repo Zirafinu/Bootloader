@@ -1,6 +1,6 @@
 SECTIONS
 {
-    .pre_startup : ALIGN(512) {
+    .pre_startup (READONLY) : ALIGN(512) {
         KEEP(*(.isr_vector))
         KEEP(*(.text.Reset_Handler))
         KEEP(*(.text._startup))
@@ -46,7 +46,7 @@ SECTIONS
     fast_data_load_start = LOADADDR(.fast_data);
     fast_data_load_size = SIZEOF(.fast_data);
 
-    .text : ALIGN(4) {
+    .text (READONLY) : ALIGN(4) {
         *(.text)           /* .text sections (code) */
         *(.text*)          /* .text* sections (code) */
         *(.glue_7)         /* glue arm to thumb code */
@@ -59,11 +59,11 @@ SECTIONS
         _etext = ALIGN(4);        /* define a global symbols at end of code */
     } > FLASH
 
-    .secrets : ALIGN(4) {
+    .secrets (READONLY) : ALIGN(4) {
         KEEP(*(.rodata.secrets))
     } > FLASH
 
-    .rodata : ALIGN(4) {
+    .rodata (READONLY) : ALIGN(4) {
         /* .rodata sections (constants, strings, etc.) */
         *(.rodata)
         *(.rodata*)

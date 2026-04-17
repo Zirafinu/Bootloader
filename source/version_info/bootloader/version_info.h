@@ -5,11 +5,11 @@
 
 namespace version {
 struct info {
-    /** the software version */
+    /** the software version [mm.nn.pppp]*/
     uint32_t version;
-    /** the compatible hardware */
+    /** the compatible hardware [id] */
     uint32_t product_id;
-    /** the time stamp of the build */
+    /** the time stamp [minutes since 1970] of the build */
     uint32_t build_time;
 };
 } // namespace version
